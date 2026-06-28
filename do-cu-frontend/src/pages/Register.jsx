@@ -10,6 +10,22 @@ function Register() {
 
     const navigate = useNavigate();
 
+    // XỬ LÝ GỬI FORM ĐĂNG KÝ
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        Swal.fire({ title: 'Đang xử lý...', text: 'Đang gửi email xác nhận', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            await api.post('/auth/register', formData);
+            Swal.close();
+            Swal.fire('Thành công!', 'Vui lòng kiểm tra Email để lấy mã OTP', 'success');
+            setStep(2); // Chuyển sang màn hình nhập OTP
+        } catch (error) {
+            Swal.close();
+            Swal.fire('Lỗi', error.response?.data?.message || error.response?.data?.error || 'Không thể đăng ký', 'error');
+        }
+    };
+
     return (
         <div className="container">
             <div className="card card-pad" style={{ maxWidth: 520, margin: '0 auto' }}>
