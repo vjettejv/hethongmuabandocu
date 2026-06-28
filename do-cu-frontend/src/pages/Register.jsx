@@ -4,6 +4,7 @@ import api from '../services/api';
 import Swal from 'sweetalert2';
 
 function Register() {
+    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
     const navigate = useNavigate();
     return (
         <div>Register Component</div>
