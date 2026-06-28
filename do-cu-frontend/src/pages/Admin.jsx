@@ -3,15 +3,9 @@ import api from '../services/api';
 
 function Admin() {
     const [posts, setPosts] = useState([]);
-    const handleStatus = async (id, status) => {
-        await api.put(`/admin/posts/${id}`, { status });
-    };
+    const [tab, setTab] = useState('pending');
     return (
-        <div>
-            {posts.map(p => (
-                <button key={p.id} onClick={() => handleStatus(p.id, 'approved')}>Approve</button>
-            ))}
-        </div>
+        <div>Admin tabs</div>
     );
 }
 export default Admin;
