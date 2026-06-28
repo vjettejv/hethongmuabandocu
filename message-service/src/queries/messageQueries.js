@@ -6,7 +6,15 @@ const getContactsHandler = async (userId) => {
 };
 
 const getHistoryHandler = async (userId, contactId) => {
-    return [];
+    return await Message.findAll({
+        where: {
+            [Sequelize.Op.or]: [
+                { senderId: userId, receiverId: contactId },
+                { senderId: contactId, receiverId: userId }
+            ]
+        },
+        order: [['createdAt', 'ASC']]
+    });
 };
 
 module.exports = { getContactsHandler, getHistoryHandler };
