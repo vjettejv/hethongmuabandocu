@@ -2,3 +2,7 @@
     display: flex;
     min-height: 500px;
 }
+.chat-sidebar {
+    width: 300px;
+    background: #fff;
+}
