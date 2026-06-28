@@ -11,7 +11,7 @@ function PostDetail() {
     }, [id]);
 
     return (
-        <div>PostDetail</div>
+        <div>{post?.title}</div>
     );
 }
 export default PostDetail;
