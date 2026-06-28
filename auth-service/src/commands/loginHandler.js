@@ -21,7 +21,7 @@ const loginHandler = async ({ username, email, password }) => {
 
     const token = jwt.sign(
         { id: user.id, roleId: user.roleId },
-        'supersecret',
+        process.env.JWT_SECRET || 'supersecret',
         { expiresIn: '1d' }
     );
     
