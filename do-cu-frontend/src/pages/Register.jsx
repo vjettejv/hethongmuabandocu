@@ -30,7 +30,7 @@ function Register() {
     const handleVerify = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/auth/verify-otp', { otp });
+            await api.post('/auth/verify-otp', { email: formData.email, otp });
             Swal.fire({
                 icon: 'success', title: 'XÃ¡c thá»±c thÃ nh cÃ´ng!', text: 'Báº¡n cÃ³ thá»ƒ Ä‘Äƒng nháº­p!', timer: 2000
             }).then(() => navigate('/login'));
