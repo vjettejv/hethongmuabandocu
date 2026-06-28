@@ -8,7 +8,11 @@ function MyPosts() {
     }, []);
 
     return (
-        <div>MyPosts Component</div>
+        <div className="container">
+            {myPosts.map(post => (
+                <div key={post.id}>{post.title}</div>
+            ))}
+        </div>
     );
 }
 export default MyPosts;
