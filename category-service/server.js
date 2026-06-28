@@ -11,6 +11,15 @@ app.use(cors());
 
 sequelize.sync().then(() => {
     console.log('Category DB synced');
+    Category.count().then(count => {
+        if (count === 0) {
+            Category.bulkCreate([
+                { name: 'Electronics', description: 'Phones, Laptops, etc.' },
+                { name: 'Furniture', description: 'Tables, Chairs, etc.' },
+                { name: 'Clothing', description: 'Shirts, Pants, etc.' }
+            ]);
+        }
+    });
 });
 
 app.use('/', routes);
