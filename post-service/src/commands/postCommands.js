@@ -48,7 +48,7 @@ const updatePostStatusHandler = async (id, status) => {
             ? BÃ i viáº¿t "\" cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c hiá»ƒn thá»‹ trÃªn chá»£.
             : BÃ i viáº¿t "\" cá»§a báº¡n Ä‘Ã£ bá»‹ tá»« chá»‘i duyá»‡t.;
             
-        fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notify', {
+        fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiverId: post.userId, title, message })
