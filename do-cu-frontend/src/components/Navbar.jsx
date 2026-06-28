@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 function LogoMark() {
   return (
     <svg className="brand-mark" viewBox="0 0 40 40" role="img" aria-label="Chá»£ Äá»“ CÅ©">
@@ -17,10 +19,14 @@ function LogoMark() {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ currentPath }) {
+  const isActive = (prefix) => (prefix === '/' ? currentPath === '/' : currentPath.startsWith(prefix));
+
   return (
     <nav className="navbar">
-      <LogoMark />
+      <Link to="/">
+        <LogoMark />
+      </Link>
     </nav>
   );
 }
