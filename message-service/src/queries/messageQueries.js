@@ -8,7 +8,16 @@ const getContactsHandler = async (userId) => {
         },
         order: [['createdAt', 'DESC']]
     });
-    return messages;
+
+    const contactsMap = {};
+    for (const msg of messages) {
+        const contactId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+        if (!contactsMap[contactId]) {
+            contactsMap[contactId] = { id: contactId, lastMessage: msg };
+        }
+    }
+    
+    return Object.values(contactsMap);
 };
 
 const getHistoryHandler = async (userId, contactId) => {
