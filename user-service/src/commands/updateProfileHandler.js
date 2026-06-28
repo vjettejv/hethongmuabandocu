@@ -5,6 +5,10 @@ const updateProfileHandler = async (authId, { fullName, phone, address, avatar }
         where: { authId },
         defaults: { fullName, phone, address, avatar }
     });
+
+    if (!created) {
+        await profile.update({ fullName, phone, address, avatar });
+    }
     return profile;
 };
 
