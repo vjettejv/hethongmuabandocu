@@ -12,6 +12,16 @@ const verifyOtpHandler = async ({ email, otp }) => {
     user.otp = null;
     await user.save();
     
+    try {
+        await fetch(`http://user-service:3002/${user.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName: user.username })
+        });
+    } catch(err) {
+        console.error("Failed to create profile", err);
+    }
+    
     return { message: 'Verified successfully' };
 };
 
