@@ -18,7 +18,14 @@ const loginHandler = async ({ username, email, password }) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new Error('Invalid credentials');
     }
-    return user;
+
+    const token = jwt.sign(
+        { id: user.id, roleId: user.roleId },
+        'supersecret',
+        { expiresIn: '1d' }
+    );
+    
+    return { token };
 };
 
 module.exports = loginHandler;
