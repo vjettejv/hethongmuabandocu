@@ -8,7 +8,7 @@ const createPostHandler = async (userId, data, files) => {
     if (files && files.length > 0) {
         const images = files.map(file => ({
             postId: newPost.id,
-            imageUrl: /uploads/\
+            imageUrl: `/uploads/${file.filename}`
         }));
         newPost.Images = await Image.bulkCreate(images);
     }
@@ -43,10 +43,10 @@ const updatePostStatusHandler = async (id, status) => {
     syncToSearch(post, catMap);
     
     if (oldStatus !== status && (status === 'approved' || status === 'rejected')) {
-        const title = status === 'approved' ? 'BÃ i viáº¿t Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t' : 'BÃ i viáº¿t bá»‹ tá»« chá»‘i';
+        const title = status === 'approved' ? 'Bài viết đã được duyệt' : 'Bài viết bị từ chối';
         const message = status === 'approved' 
-            ? BÃ i viáº¿t "\" cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c hiá»ƒn thá»‹ trÃªn chá»£.
-            : BÃ i viáº¿t "\" cá»§a báº¡n Ä‘Ã£ bá»‹ tá»« chá»‘i duyá»‡t.;
+            ? `Bài viết "${post.title}" của bạn đã được hiển thị trên chợ.`
+            : `Bài viết "${post.title}" của bạn đã bị từ chối duyệt.`;
             
         fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notifications', {
             method: 'POST',

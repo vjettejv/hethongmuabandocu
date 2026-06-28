@@ -21,15 +21,15 @@ const getContactsHandler = async (userId) => {
     
     for (let c of contactsList) {
         try {
-            const response = await fetch(http://user-service:3002/\);
+            const response = await fetch(`http://user-service:3002/${c.id}`);
             if (response.ok) {
                 const profile = await response.json();
                 c.user = { id: c.id, fullName: profile.fullName, username: profile.fullName };
             } else {
-                c.user = { id: c.id, username: User \ };
+                c.user = { id: c.id, username: `User ${c.id}` };
             }
         } catch (err) {
-            c.user = { id: c.id, username: User \ };
+            c.user = { id: c.id, username: `User ${c.id}` };
         }
     }
     return contactsList;

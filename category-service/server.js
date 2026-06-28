@@ -26,4 +26,4 @@ sequelize.sync().then(() => {
 app.use('/', routes);
 
 const PORT = process.env.PORT || 3004;
-app.listen(PORT, () => console.log(Category Service running on port \));
+app.listen(PORT, () => console.log(`Category Service running on port ${PORT}`));

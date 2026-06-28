@@ -6,36 +6,36 @@ import Swal from 'sweetalert2';
 function Register() {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
     const [otp, setOtp] = useState('');
-    const [step, setStep] = useState(1); // BÆ°á»›c 1: Äiá»n form | BÆ°á»›c 2: Nháº­p OTP
+    const [step, setStep] = useState(1); // Bước 1: Điền form | Bước 2: Nhập OTP
 
     const navigate = useNavigate();
 
-    // Xá»¬ LÃ Gá»¬I FORM ÄÄ‚NG KÃ
+    // XỬ LÝ GỬI FORM ĐĂNG KÝ
     const handleRegister = async (e) => {
         e.preventDefault();
-        Swal.fire({ title: 'Äang xá»­ lÃ½...', text: 'Äang gá»­i email xÃ¡c nháº­n', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'Đang xử lý...', text: 'Đang gửi email xác nhận', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
         try {
             await api.post('/auth/register', formData);
             Swal.close();
-            Swal.fire('ThÃ nh cÃ´ng!', 'Vui lÃ²ng kiá»ƒm tra Email Ä‘á»ƒ láº¥y mÃ£ OTP', 'success');
-            setStep(2); // Chuyá»ƒn sang mÃ n hÃ¬nh nháº­p OTP
+            Swal.fire('Thành công!', 'Vui lòng kiểm tra Email để lấy mã OTP', 'success');
+            setStep(2); // Chuyển sang màn hình nhập OTP
         } catch (error) {
             Swal.close();
-            Swal.fire('Lá»—i', error.response?.data?.message || error.response?.data?.error || 'KhÃ´ng thá»ƒ Ä‘Äƒng kÃ½', 'error');
+            Swal.fire('Lỗi', error.response?.data?.message || error.response?.data?.error || 'Không thể đăng ký', 'error');
         }
     };
 
-    // Xá»¬ LÃ XÃC THá»°C OTP
+    // XỬ LÝ XÁC THỰC OTP
     const handleVerify = async (e) => {
         e.preventDefault();
         try {
             await api.post('/auth/verify-otp', { email: formData.email, otp });
             Swal.fire({
-                icon: 'success', title: 'XÃ¡c thá»±c thÃ nh cÃ´ng!', text: 'Báº¡n cÃ³ thá»ƒ Ä‘Äƒng nháº­p!', timer: 2000
+                icon: 'success', title: 'Xác thực thành công!', text: 'Bạn có thể đăng nhập!', timer: 2000
             }).then(() => navigate('/login'));
         } catch (error) {
-            Swal.fire('Lá»—i', error.response?.data?.message || 'MÃ£ OTP sai rá»“i!', 'error');
+            Swal.fire('Lỗi', error.response?.data?.message || 'Mã OTP sai rồi!', 'error');
         }
     };
 
@@ -45,23 +45,23 @@ function Register() {
                 <div className="toolbar">
                     <div className="toolbar-grow">
                         <h2 className="toolbar-title" style={{ margin: 0 }}>
-                            {step === 1 ? 'ÄÄƒng kÃ½' : 'XÃ¡c thá»±c OTP'}
+                            {step === 1 ? 'Đăng ký' : 'Xác thực OTP'}
                         </h2>
                         <div className="hint">
                             {step === 1
-                                ? 'Táº¡o tÃ i khoáº£n Ä‘á»ƒ Ä‘Äƒng tin vÃ  chat thuáº­n tiá»‡n.'
-                                : 'Nháº­p mÃ£ OTP 6 chá»¯ sá»‘ Ä‘Ã£ gá»­i tá»›i email cá»§a báº¡n.'}
+                                ? 'Tạo tài khoản để đăng tin và chat thuận tiện.'
+                                : 'Nhập mã OTP 6 chữ số đã gửi tới email của bạn.'}
                         </div>
                     </div>
                     <button className="btn btn-ghost" type="button" onClick={() => navigate('/')}>
-                        Vá» trang chá»§
+                        Về trang chủ
                     </button>
                 </div>
 
                 {step === 1 ? (
                     <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
                         <div className="field">
-                            <div className="label">TÃªn Ä‘Äƒng nháº­p</div>
+                            <div className="label">Tên đăng nhập</div>
                             <input
                                 className="input"
                                 type="text"
@@ -83,11 +83,11 @@ function Register() {
                             />
                         </div>
                         <div className="field">
-                            <div className="label">Máº­t kháº©u</div>
+                            <div className="label">Mật khẩu</div>
                             <input
                                 className="input"
                                 type="password"
-                                placeholder="Tá»‘i thiá»ƒu 6 kÃ½ tá»± (khuyáº¿n nghá»‹)"
+                                placeholder="Tối thiểu 6 ký tự (khuyến nghị)"
                                 required
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -95,31 +95,31 @@ function Register() {
                         </div>
 
                         <button className="btn btn-primary" type="submit" style={{ marginTop: 6 }}>
-                            ÄÄƒng kÃ½
+                            Đăng ký
                         </button>
 
                         <div className="hint" style={{ textAlign: 'center', marginTop: 6 }}>
-                            ÄÃ£ cÃ³ tÃ i khoáº£n?{' '}
+                            Đã có tài khoản?{' '}
                             <span style={{ color: 'var(--primary)', fontWeight: 900, cursor: 'pointer' }} onClick={() => navigate('/login')}>
-                                ÄÄƒng nháº­p
+                                Đăng nhập
                             </span>
                         </div>
                     </form>
                 ) : (
                     <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
                         <div className="card card-pad" style={{ background: 'rgba(15,23,42,0.03)' }}>
-                            <div className="label">Email nháº­n OTP</div>
+                            <div className="label">Email nhận OTP</div>
                             <div className="hint" style={{ marginTop: 6, fontWeight: 900 }}>
                                 {formData.email}
                             </div>
                         </div>
 
                         <div className="field">
-                            <div className="label">MÃ£ OTP</div>
+                            <div className="label">Mã OTP</div>
                             <input
                                 className="input"
                                 type="text"
-                                placeholder="Nháº­p 6 chá»¯ sá»‘"
+                                placeholder="Nhập 6 chữ số"
                                 required
                                 maxLength="6"
                                 value={otp}
@@ -130,11 +130,11 @@ function Register() {
                         </div>
 
                         <button className="btn btn-primary" type="submit">
-                            XÃ¡c thá»±c & kÃ­ch hoáº¡t
+                            Xác thực & kích hoạt
                         </button>
 
                         <button className="btn btn-ghost" type="button" onClick={() => { setStep(1); setOtp(''); }}>
-                            Gá»­i láº¡i OTP
+                            Gửi lại OTP
                         </button>
                     </form>
                 )}
