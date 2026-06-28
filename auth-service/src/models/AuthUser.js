@@ -6,7 +6,9 @@ const AuthUser = sequelize.define('AuthUser', {
     roleId: { type: DataTypes.INTEGER, defaultValue: 1 },
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    password: { type: DataTypes.STRING, allowNull: false }
-});
+    password: { type: DataTypes.STRING, allowNull: false },
+    isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    otp: { type: DataTypes.STRING, allowNull: true }
+}, { tableName: 'AuthUsers', timestamps: true });
 
 module.exports = AuthUser;
