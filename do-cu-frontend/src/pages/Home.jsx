@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../services/api';
 
 function Home() {
+    const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        api.get('/posts').then(res => setPosts(res.data.data || res.data));
+    }, []);
 
     return (
         <div className="container">
