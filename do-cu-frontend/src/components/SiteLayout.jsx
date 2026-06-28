@@ -1,5 +1,7 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 function getSession() {
   const token = localStorage.getItem('token');
@@ -15,14 +17,26 @@ function getSession() {
 }
 
 export default function SiteLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sessionTick, setSessionTick] = useState(0);
   const session = useMemo(() => {
     return getSession();
   }, [sessionTick]);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    setSessionTick((x) => x + 1);
+    navigate('/', { replace: true });
+  };
+
   return (
-    <div>
-      <Outlet />
+    <div className="app-shell">
+      <Navbar session={session} currentPath={location.pathname} onLogout={handleLogout} />
+      <main className="app-main">
+        <Outlet />
+      </main>
+      <Footer />
     </div>
   );
 }
