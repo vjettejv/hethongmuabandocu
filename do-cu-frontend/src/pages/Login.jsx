@@ -5,7 +5,8 @@ function Login() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const handleLogin = async (e) => {
         e.preventDefault();
-        await api.post('/auth/login', formData);
+        const res = await api.post('/auth/login', formData);
+        localStorage.setItem('token', res.data.token);
     };
     return (
         <form onSubmit={handleLogin}>
