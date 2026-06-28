@@ -29,7 +29,9 @@ const updatePostStatusHandler = async (id, status) => {
 };
 
 const deleteAdminPostHandler = async (id) => {
-    return null;
+    await Image.destroy({ where: { postId: id } });
+    await Post.destroy({ where: { id } });
+    return { message: 'Deleted' };
 };
 
 module.exports = { createPostHandler, deleteMyPostHandler, updatePostStatusHandler, deleteAdminPostHandler };
