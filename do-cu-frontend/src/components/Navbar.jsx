@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function LogoMark() {
   return (
@@ -19,8 +20,21 @@ function LogoMark() {
   );
 }
 
-export default function Navbar({ currentPath }) {
+export default function Navbar({ session, currentPath, onLogout }) {
+  const navigate = useNavigate();
   const isActive = (prefix) => (prefix === '/' ? currentPath === '/' : currentPath.startsWith(prefix));
+
+  const confirmLogout = async () => {
+    const result = await Swal.fire({
+      title: 'ÄÄƒng xuáº¥t?',
+      text: 'Báº¡n sáº½ cáº§n Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ tiáº¿p tá»¥c mua bÃ¡n.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'ÄÄƒng xuáº¥t',
+      confirmButtonColor: '#ef4444',
+    });
+    if (result.isConfirmed) onLogout();
+  };
 
   return (
     <nav className="navbar">
