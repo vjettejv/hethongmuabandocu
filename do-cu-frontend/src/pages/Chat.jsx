@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
 function Chat() {
-    const [contacts, setContacts] = useState([]);
+    const [messages, setMessages] = useState([]);
     return (
         <div className="chat-container">
-            <aside className="chat-sidebar">
-                {contacts.map(c => <div key={c.id}>{c.username}</div>)}
-            </aside>
+            <div className="chat-main">
+                {messages.map((m, idx) => <div key={idx}>{m.content}</div>)}
+            </div>
         </div>
     );
 }
