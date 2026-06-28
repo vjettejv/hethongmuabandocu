@@ -25,7 +25,13 @@ const deleteMyPostHandler = async (userId, id) => {
 };
 
 const updatePostStatusHandler = async (id, status) => {
-    return null;
+    const post = await Post.findByPk(id, { include: Image });
+    if (!post) throw new Error('Not found');
+    
+    const oldStatus = post.status;
+    post.status = status;
+    await post.save();
+    return post;
 };
 
 const deleteAdminPostHandler = async (id) => {
