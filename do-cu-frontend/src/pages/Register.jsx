@@ -26,6 +26,19 @@ function Register() {
         }
     };
 
+    // Xá»¬ LÃ XÃC THá»°C OTP
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/auth/verify-otp', { otp });
+            Swal.fire({
+                icon: 'success', title: 'XÃ¡c thá»±c thÃ nh cÃ´ng!', text: 'Báº¡n cÃ³ thá»ƒ Ä‘Äƒng nháº­p!', timer: 2000
+            }).then(() => navigate('/login'));
+        } catch (error) {
+            Swal.fire('Lá»—i', error.response?.data?.message || 'MÃ£ OTP sai rá»“i!', 'error');
+        }
+    };
+
     return (
         <div className="container">
             <div className="card card-pad" style={{ maxWidth: 520, margin: '0 auto' }}>
