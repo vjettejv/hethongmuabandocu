@@ -41,6 +41,19 @@ const updatePostStatusHandler = async (id, status) => {
     
     const catMap = await fetchCategoriesMap();
     syncToSearch(post, catMap);
+    
+    if (oldStatus !== status && (status === 'approved' || status === 'rejected')) {
+        const title = status === 'approved' ? 'Bài viết đã được duyệt' : 'Bài viết bị từ chối';
+        const message = status === 'approved' 
+            ? `Bài viết "${post.title}" của bạn đã được hiển thị trên chợ.`
+            : `Bài viết "${post.title}" của bạn đã bị từ chối duyệt.`;
+            
+        fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverId: post.userId, title, message })
+        }).catch(e => console.error('Failed to trigger notification', e.message));
+    }
     return post;
 };
 
