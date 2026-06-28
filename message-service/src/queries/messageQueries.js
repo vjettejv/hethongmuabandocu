@@ -20,7 +20,7 @@ const getContactsHandler = async (userId) => {
     const contactsList = Object.values(contactsMap);
     
     for (let c of contactsList) {
-        const response = await fetch(http://user-service:3000/\);
+        const response = await fetch(http://user-service:3002/\);
         if (response.ok) {
             const profile = await response.json();
             c.user = { id: c.id, fullName: profile.fullName, username: profile.fullName };
