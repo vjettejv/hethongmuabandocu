@@ -1,8 +1,10 @@
 .chat-container {
     display: flex;
-    min-height: 500px;
 }
 .chat-sidebar {
     width: 300px;
-    background: #fff;
+}
+.chat-input-area {
+    display: flex;
+    padding: 10px;
 }
