@@ -25,7 +25,7 @@ const loginHandler = async ({ username, email, password }) => {
         { expiresIn: '1d' }
     );
     
-    return { token };
+    return { token, user: { id: user.id, username: user.username, email: user.email } };
 };
 
 module.exports = loginHandler;
