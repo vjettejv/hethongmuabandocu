@@ -1,3 +1,7 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { Sequelize } = require('sequelize');
+
 const loginHandler = async ({ username, email, password }) => {
     return null;
 };
