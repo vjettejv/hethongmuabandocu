@@ -5,6 +5,9 @@ import Swal from 'sweetalert2';
 
 function Register() {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+    const [otp, setOtp] = useState('');
+    const [step, setStep] = useState(1); // Bước 1: Điền form | Bước 2: Nhập OTP
+
     const navigate = useNavigate();
     return (
         <div>Register Component</div>
