@@ -24,6 +24,8 @@ const getContactsHandler = async (userId) => {
         if (response.ok) {
             const profile = await response.json();
             c.user = { id: c.id, fullName: profile.fullName, username: profile.fullName };
+        } else {
+            c.user = { id: c.id, username: User \ };
         }
     }
     return contactsList;
