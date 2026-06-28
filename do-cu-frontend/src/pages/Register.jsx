@@ -26,7 +26,7 @@ function Register() {
         }
     };
 
-    // XỬ LÝ XÁC THỰC OTP (Có lỗi thiếu email)
+    // XỬ LÝ XÁC THỰC OTP
     const handleVerify = async (e) => {
         e.preventDefault();
         try {
@@ -57,6 +57,87 @@ function Register() {
                         Về trang chủ
                     </button>
                 </div>
+
+                {step === 1 ? (
+                    <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                        <div className="field">
+                            <div className="label">Tên đăng nhập</div>
+                            <input
+                                className="input"
+                                type="text"
+                                placeholder="VD: phamvandat"
+                                required
+                                value={formData.username}
+                                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                            />
+                        </div>
+                        <div className="field">
+                            <div className="label">Email</div>
+                            <input
+                                className="input"
+                                type="email"
+                                placeholder="VD: dat@gmail.com"
+                                required
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
+                        </div>
+                        <div className="field">
+                            <div className="label">Mật khẩu</div>
+                            <input
+                                className="input"
+                                type="password"
+                                placeholder="Tối thiểu 6 ký tự (khuyến nghị)"
+                                required
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
+                        </div>
+
+                        <button className="btn btn-primary" type="submit" style={{ marginTop: 6 }}>
+                            Đăng ký
+                        </button>
+
+                        <div className="hint" style={{ textAlign: 'center', marginTop: 6 }}>
+                            Đã có tài khoản?{' '}
+                            <span style={{ color: 'var(--primary)', fontWeight: 900, cursor: 'pointer' }} onClick={() => navigate('/login')}>
+                                Đăng nhập
+                            </span>
+                        </div>
+                    </form>
+                ) : (
+                    <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                        <div className="card card-pad" style={{ background: 'rgba(15,23,42,0.03)' }}>
+                            <div className="label">Email nhận OTP</div>
+                            <div className="hint" style={{ marginTop: 6, fontWeight: 900 }}>
+                                {formData.email}
+                            </div>
+                        </div>
+
+                        <div className="field">
+                            <div className="label">Mã OTP</div>
+                            <input
+                                className="input"
+                                type="text"
+                                placeholder="Nhập 6 chữ số"
+                                required
+                                maxLength="6"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                inputMode="numeric"
+                                style={{ textAlign: 'center', fontSize: 18, letterSpacing: 6, fontWeight: 900 }}
+                            />
+                        </div>
+
+                        <button className="btn btn-primary" type="submit">
+                            Xác thực & kích hoạt
+                        </button>
+
+                        <button className="btn btn-ghost" type="button" onClick={() => { setStep(1); setOtp(''); }}>
+                            Gửi lại OTP
+                        </button>
+                    </form>
+                )}
             </div>
         </div>
     );
