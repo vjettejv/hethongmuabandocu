@@ -14,6 +14,10 @@ const loginHandler = async ({ username, email, password }) => {
             ]
         }
     });
+
+    if (!user || !bcrypt.compare(password, user.password)) {
+        throw new Error('Invalid credentials');
+    }
     return user;
 };
 
