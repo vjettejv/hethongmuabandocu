@@ -20,11 +20,15 @@ const getContactsHandler = async (userId) => {
     const contactsList = Object.values(contactsMap);
     
     for (let c of contactsList) {
-        const response = await fetch(http://user-service:3002/\);
-        if (response.ok) {
-            const profile = await response.json();
-            c.user = { id: c.id, fullName: profile.fullName, username: profile.fullName };
-        } else {
+        try {
+            const response = await fetch(http://user-service:3002/\);
+            if (response.ok) {
+                const profile = await response.json();
+                c.user = { id: c.id, fullName: profile.fullName, username: profile.fullName };
+            } else {
+                c.user = { id: c.id, username: User \ };
+            }
+        } catch (err) {
             c.user = { id: c.id, username: User \ };
         }
     }
