@@ -1,7 +1,9 @@
 const { Post, Image } = require('../models');
 
 const createPostHandler = async (userId, data, files) => {
-    return null;
+    const { categoryId, title, description, price, condition } = data;
+    const newPost = await Post.create({ userId, categoryId, title, description, price, condition });
+    return newPost;
 };
 
 const deleteMyPostHandler = async (userId, id) => {
