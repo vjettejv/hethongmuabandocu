@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const sequelize = require('./src/config/db');
+const Category = require('./src/models/Category');
 const routes = require('./src/routes');
 
 const app = express();
