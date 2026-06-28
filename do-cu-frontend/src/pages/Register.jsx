@@ -10,6 +10,22 @@ function Register() {
 
     const navigate = useNavigate();
 
+    // Xá»¬ LÃ Gá»¬I FORM ÄÄ‚NG KÃ
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        Swal.fire({ title: 'Äang xá»­ lÃ½...', text: 'Äang gá»­i email xÃ¡c nháº­n', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            await api.post('/auth/register', formData);
+            Swal.close();
+            Swal.fire('ThÃ nh cÃ´ng!', 'Vui lÃ²ng kiá»ƒm tra Email Ä‘á»ƒ láº¥y mÃ£ OTP', 'success');
+            setStep(2); // Chuyá»ƒn sang mÃ n hÃ¬nh nháº­p OTP
+        } catch (error) {
+            Swal.close();
+            Swal.fire('Lá»—i', error.response?.data?.message || error.response?.data?.error || 'KhÃ´ng thá»ƒ Ä‘Äƒng kÃ½', 'error');
+        }
+    };
+
     return (
         <div className="container">
             <div className="card card-pad" style={{ maxWidth: 520, margin: '0 auto' }}>
