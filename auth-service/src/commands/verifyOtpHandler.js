@@ -8,6 +8,10 @@ const verifyOtpHandler = async ({ email, otp }) => {
         throw new Error('MÃ£ OTP khÃ´ng chÃ­nh xÃ¡c');
     }
     
+    user.isVerified = true;
+    user.otp = null;
+    await user.save();
+    
     return { message: 'Verified successfully' };
 };
 
