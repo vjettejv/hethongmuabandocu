@@ -48,7 +48,7 @@ const updatePostStatusHandler = async (id, status) => {
             ? `Bài viết "${post.title}" của bạn đã được hiển thị trên chợ.`
             : `Bài viết "${post.title}" của bạn đã bị từ chối duyệt.`;
             
-        fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notify', {
+        fetch((process.env.MESSAGE_SERVICE_URL || 'http://message-service:3005') + '/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiverId: post.userId, title, message })
