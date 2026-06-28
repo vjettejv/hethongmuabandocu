@@ -26,6 +26,19 @@ function Register() {
         }
     };
 
+    // XỬ LÝ XÁC THỰC OTP (Có lỗi thiếu email)
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/auth/verify-otp', { otp });
+            Swal.fire({
+                icon: 'success', title: 'Xác thực thành công!', text: 'Bạn có thể đăng nhập!', timer: 2000
+            }).then(() => navigate('/login'));
+        } catch (error) {
+            Swal.fire('Lỗi', error.response?.data?.message || 'Mã OTP sai rồi!', 'error');
+        }
+    };
+
     return (
         <div className="container">
             <div className="card card-pad" style={{ maxWidth: 520, margin: '0 auto' }}>
