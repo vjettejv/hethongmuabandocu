@@ -1,4 +1,5 @@
 const { Post, Image } = require('../models');
+const { fetchCategoriesMap, syncToSearch } = require('../utils/helpers');
 
 const createPostHandler = async (userId, data, files) => {
     const { categoryId, title, description, price, condition } = data;
@@ -12,6 +13,8 @@ const createPostHandler = async (userId, data, files) => {
         newPost.Images = await Image.bulkCreate(images);
     }
 
+    const catMap = await fetchCategoriesMap();
+    syncToSearch(newPost, catMap);
     return newPost;
 };
 
@@ -21,6 +24,10 @@ const deleteMyPostHandler = async (userId, id) => {
     
     await Image.destroy({ where: { postId: id } });
     await Post.destroy({ where: { id } });
+    
+    const catMap = await fetchCategoriesMap();
+    post.status = 'deleted';
+    syncToSearch(post, catMap);
     return { message: 'Deleted successfully' };
 };
 
@@ -31,6 +38,9 @@ const updatePostStatusHandler = async (id, status) => {
     const oldStatus = post.status;
     post.status = status;
     await post.save();
+    
+    const catMap = await fetchCategoriesMap();
+    syncToSearch(post, catMap);
     return post;
 };
 
