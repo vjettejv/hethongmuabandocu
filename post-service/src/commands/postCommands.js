@@ -1,3 +1,5 @@
+const { Post, Image } = require('../models');
+
 const createPostHandler = async (userId, data, files) => {
     return null;
 };
