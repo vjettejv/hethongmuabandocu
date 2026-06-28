@@ -1,3 +1,6 @@
+const { Sequelize } = require('sequelize');
+const { Message } = require('../models');
+
 const getContactsHandler = async (userId) => {
     return [];
 };
