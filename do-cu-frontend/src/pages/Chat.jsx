@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
 function Chat() {
     const [messages, setMessages] = useState([]);
+    useEffect(() => {
+        const socket = io();
+        socket.on('receive_message', (msg) => {
+            setMessages(prev => [...prev, msg]);
+        });
+        return () => socket.disconnect();
+    }, []);
     return (
-        <div className="chat-container">
-            <div className="chat-main">
-                {messages.map((m, idx) => <div key={idx}>{m.content}</div>)}
-            </div>
-        </div>
+        <div>Chat</div>
     );
 }
 export default Chat;
