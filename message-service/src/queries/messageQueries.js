@@ -2,7 +2,13 @@ const { Sequelize } = require('sequelize');
 const { Message } = require('../models');
 
 const getContactsHandler = async (userId) => {
-    return [];
+    const messages = await Message.findAll({
+        where: {
+            [Sequelize.Op.or]: [{ senderId: userId }, { receiverId: userId }]
+        },
+        order: [['createdAt', 'DESC']]
+    });
+    return messages;
 };
 
 const getHistoryHandler = async (userId, contactId) => {
