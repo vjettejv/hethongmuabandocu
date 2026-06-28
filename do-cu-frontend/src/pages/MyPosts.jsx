@@ -3,14 +3,15 @@ import api from '../services/api';
 
 function MyPosts() {
     const [myPosts, setMyPosts] = useState([]);
-    useEffect(() => {
-        api.get('/posts/my-posts').then(res => setMyPosts(res.data.data || res.data));
-    }, []);
+    const handleDelete = async (id) => {
+        await api.delete(`/posts/${id}`);
+        setMyPosts(myPosts.filter(p => p.id !== id));
+    };
 
     return (
         <div className="container">
             {myPosts.map(post => (
-                <div key={post.id}>{post.title}</div>
+                <button key={post.id} onClick={() => handleDelete(post.id)}>Xoa</button>
             ))}
         </div>
     );
