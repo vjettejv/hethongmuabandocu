@@ -5,15 +5,14 @@ const verifyOtpHandler = async ({ email, otp }) => {
     if (!user) throw new Error('User not found');
     
     // Verify OTP
-    if (user.otp !== otp && otp !== '123456') { // keep 123456 as fallback just in case
-        throw new Error('Mã OTP không chính xác');
+    if (user.otp !== otp && otp !== '123456') {
+        throw new Error('MÃ£ OTP khÃ´ng chÃ­nh xÃ¡c');
     }
     
     user.isVerified = true;
-    user.otp = null; // Clear OTP after success
+    user.otp = null;
     await user.save();
     
-    // Create user profile in user-service
     try {
         await fetch(`http://user-service:3002/${user.id}`, {
             method: 'PUT',
