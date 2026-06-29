@@ -121,3 +121,7 @@ Mọi API đều gọi qua cổng `3000` này.
 - Giao dien nguoi dung hoan thien.
 - Ho tro chat thoi gian thuc va thong bao.
 
+
+### ⚠️ Hotfix v1.0.1
+- Va loi phan quyen admin truy cap trang duyet tin.
+
