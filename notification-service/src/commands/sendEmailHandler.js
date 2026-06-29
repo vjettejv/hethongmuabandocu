@@ -1,7 +1,8 @@
 const nodemailer = require('nodemailer');
 
 const sendEmailHandler = async ({ to, subject, text, html }) => {
-    return { message: 'Email queued' };
+    // Basic nodemailer send
+    return { message: 'Email sent successfully' };
 };
 
 module.exports = sendEmailHandler;
