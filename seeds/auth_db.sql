@@ -5,5 +5,8 @@ CREATE TABLE IF NOT EXISTS Users (
   id int NOT NULL AUTO_INCREMENT,
   roleId int DEFAULT '1',
   username varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
   PRIMARY KEY (id)
 );
+
+INSERT INTO Users (id, roleId, username, email) VALUES (1, 2, 'admin', 'admin@gmail.com');
