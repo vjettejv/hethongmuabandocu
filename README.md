@@ -129,3 +129,7 @@ Mọi API đều gọi qua cổng `3000` này.
 ### 🐛 Bugfix: Token Validation
 - Sua loi thieu thu vien jsonwebtoken trong he thong.
 
+
+## 🚀 Ke Hoach Feature Tiep Theo: Search Engine
+- Nang cap bo loc tim kiem dong bo hoa elasticsearch.
+
