@@ -1,20 +1,341 @@
-version: '3.8'
-
 services:
+  # ==========================================
+  # DATABASES
+  # ==========================================
+  auth-db:
+    image: mysql:8.0
+    container_name: do-cu-auth-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - auth_data:/var/lib/mysql
+      - ./seeds/auth_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
   user-db:
     image: mysql:8.0
     container_name: do-cu-user-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - user_data:/var/lib/mysql
+      - ./seeds/user_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  post-db:
+    image: mysql:8.0
+    container_name: do-cu-post-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: post_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - post_data:/var/lib/mysql
+      - ./seeds/post_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  category-db:
+    image: mysql:8.0
+    container_name: do-cu-category-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: category_db
+    ports:
+      - "3310:3306"
+    volumes:
+      - category_data:/var/lib/mysql
+      - ./seeds/category_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  message-db:
+    image: mysql:8.0
+    container_name: do-cu-message-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: message_db
+    ports:
+      - "3311:3306"
+    volumes:
+      - message_data:/var/lib/mysql
+      - ./seeds/message_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  review-db:
+    image: mysql:8.0
+    container_name: do-cu-review-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: review_db
+    ports:
+      - "3312:3306"
+    volumes:
+      - review_data:/var/lib/mysql
+      - ./seeds/review_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  search-db:
+    image: mysql:8.0
+    container_name: do-cu-search-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: search_db
+    ports:
+      - "3313:3306"
+    volumes:
+      - search_data:/var/lib/mysql
+      - ./seeds/search_db.sql:/docker-entrypoint-initdb.d/1_init.sql
+    networks:
+      - do-cu-micro-net
+
+  favorite-db:
+    image: mysql:8.0
+    container_name: do-cu-favorite-db
+    command: --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: favorite_db
+    ports:
+      - "3314:3306"
+    volumes:
+      - favorite_data:/var/lib/mysql
+    networks:
+      - do-cu-micro-net
+
+
+  # ==========================================
+  # MICROSERVICES
+  # ==========================================
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - USER_SERVICE_URL=http://user-service:3002
+      - POST_SERVICE_URL=http://post-service:3003
+      - CATEGORY_SERVICE_URL=http://category-service:3004
+      - MESSAGE_SERVICE_URL=http://message-service:3005
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
+      - REVIEW_SERVICE_URL=http://review-service:3007
+      - SEARCH_SERVICE_URL=http://search-service:3008
+      - FAVORITE_SERVICE_URL=http://favorite-service:3009
+    depends_on:
+      - auth-service
+      - user-service
+      - post-service
+      - category-service
+      - message-service
+      - notification-service
+      - review-service
+      - search-service
+      - favorite-service
+    networks:
+      - do-cu-micro-net
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+      - DB_HOST=auth-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=auth_db
+      - JWT_SECRET=supersecret
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
+    depends_on:
+      - auth-db
     networks:
       - do-cu-micro-net
 
   user-service:
     build: ./user-service
-    ports:
-      - "3002:3002"
+    container_name: user-service
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - DB_HOST=user-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=user_db
+    depends_on:
+      - user-db
     networks:
       - do-cu-micro-net
+
+  post-service:
+    build: ./post-service
+    container_name: post-service
+    restart: unless-stopped
+    volumes:
+      - shared_uploads:/app/uploads
+    environment:
+      - PORT=3003
+      - DB_HOST=post-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=post_db
+      - CATEGORY_SERVICE_URL=http://category-service:3004
+      - SEARCH_SERVICE_URL=http://search-service:3008
+    depends_on:
+      - post-db
+    networks:
+      - do-cu-micro-net
+
+  category-service:
+    build: ./category-service
+    container_name: category-service
+    restart: unless-stopped
+    environment:
+      - PORT=3004
+      - DB_HOST=category-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=category_db
+    depends_on:
+      - category-db
+    networks:
+      - do-cu-micro-net
+
+  message-service:
+    build: ./message-service
+    container_name: message-service
+    restart: unless-stopped
+    environment:
+      - PORT=3005
+      - DB_HOST=message-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=message_db
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
+    depends_on:
+      - message-db
+    networks:
+      - do-cu-micro-net
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+    restart: unless-stopped
+    environment:
+
+      - PORT=3006
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=chipxinhgaiii@gmail.com
+      - SMTP_PASS=mnou gnev qrkg yftd
+    networks:
+      - do-cu-micro-net
+
+  review-service:
+    build: ./review-service
+    container_name: review-service
+    restart: unless-stopped
+    volumes:
+      - shared_uploads:/app/uploads
+    environment:
+      - PORT=3007
+      - DB_HOST=review-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=review_db
+    depends_on:
+      - review-db
+    networks:
+      - do-cu-micro-net
+
+  search-service:
+    build: ./search-service
+    container_name: search-service
+    restart: unless-stopped
+    environment:
+      - PORT=3008
+      - DB_HOST=search-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=search_db
+    depends_on:
+      - search-db
+    networks:
+      - do-cu-micro-net
+
+  favorite-service:
+    build: ./favorite-service
+    container_name: favorite-service
+    restart: unless-stopped
+    environment:
+      - PORT=3009
+      - DB_HOST=favorite-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=favorite_db
+      - POST_SERVICE_URL=http://post-service:3003
+      - JWT_SECRET=supersecret
+    depends_on:
+      - favorite-db
+    networks:
+      - do-cu-micro-net
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+  frontend:
+    build: ./do-cu-frontend
+    container_name: do-cu-frontend-micro
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - do-cu-micro-net
+
+volumes:
+  auth_data:
+  user_data:
+  post_data:
+  category_data:
+  message_data:
+  review_data:
+  search_data:
+  favorite_data:
+  shared_uploads:
 
 networks:
   do-cu-micro-net:
