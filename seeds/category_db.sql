@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS Categories (
   name varchar(255) NOT NULL,
   PRIMARY KEY (id)
 );
+
+INSERT INTO Categories (id, name) VALUES (1, 'Electronics'), (2, 'Furniture');
