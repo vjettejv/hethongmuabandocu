@@ -116,3 +116,8 @@ Mọi API đều gọi qua cổng `3000` này.
 | `migrate.ps1 cannot be loaded` | PowerShell chặn script | Chạy: `powershell -ExecutionPolicy Bypass -File migrate.ps1` |
 | Database trống sau migrate | Container DB chưa kịp khởi tạo | Đợi 30s rồi chạy lại `migrate.ps1` |
 | Tìm kiếm không có kết quả | Chưa sync dữ liệu Search | Chạy: `docker exec post-service node sync-all.js` |
+## 📦 Phien Ban Release v1.0.0
+- Tich hop toan bo cac microservices.
+- Giao dien nguoi dung hoan thien.
+- Ho tro chat thoi gian thuc va thong bao.
+
