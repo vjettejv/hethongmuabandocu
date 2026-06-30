@@ -3,14 +3,13 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-inner">
         <div className="footer-left">
-          <div className="footer-title">Chợ Đồ Cũ</div>
-          <div className="footer-text">Nền tảng rao vặt đồ cũ: đăng tin nhanh, duyệt minh bạch, chat thuận tiện.</div>
+          <div className="footer-title">Chá»£ Äá»“ CÅ©</div>
+          <div className="footer-text">Ná»n táº£ng rao váº·t Ä‘á»“ cÅ©: Ä‘Äƒng tin nhanh, duyá»‡t minh báº¡ch, chat thuáº­n tiá»‡n.</div>
         </div>
         <div className="footer-right">
-          <div className="footer-meta">© {new Date().getFullYear()} DoCu</div>
+          <div className="footer-meta">Â© {new Date().getFullYear()} DoCu</div>
         </div>
       </div>
     </footer>
   );
 }
-
