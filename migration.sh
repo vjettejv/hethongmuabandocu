@@ -13,7 +13,7 @@ CREATE TABLE temp_auth_users AS SELECT id, roleId, username, email, password, is
 CREATE TABLE temp_user_UserProfiles AS SELECT id, id as authId, fullName, phone, address, NULL as avatar, createdAt, updatedAt FROM users;
 CREATE TABLE temp_cat_categories AS SELECT id, name, description, NOW() as createdAt, NOW() as updatedAt FROM categories;
 CREATE TABLE temp_post_Posts AS SELECT id, userId, categoryId, title, description, price, status, createdAt, updatedAt FROM posts;
-CREATE TABLE temp_post_Images AS SELECT id, postId, imageUrl as url, NOW() as createdAt, NOW() as updatedAt FROM images WHERE postId IS NOT NULL;
+CREATE TABLE temp_post_Images AS SELECT id, postId, imageUrl, NOW() as createdAt, NOW() as updatedAt FROM images WHERE postId IS NOT NULL;
 CREATE TABLE temp_msg_Messages AS SELECT id, senderId, receiverId, content, createdAt, updatedAt FROM messages;
 "
 
