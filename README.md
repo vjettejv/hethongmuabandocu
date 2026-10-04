@@ -125,3 +125,11 @@ Mọi API đều gọi qua cổng `3000` này.
 ### ⚠️ Hotfix v1.0.1
 - Va loi phan quyen admin truy cap trang duyet tin.
 
+
+### 🐛 Bugfix: Token Validation
+- Sua loi thieu thu vien jsonwebtoken trong he thong.
+
+
+## 🚀 Ke Hoach Feature Tiep Theo: Search Engine
+- Nang cap bo loc tim kiem dong bo hoa elasticsearch.
+
