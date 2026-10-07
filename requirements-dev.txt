@@ -1,0 +1,3 @@
+-r auth-service/requirements-dev.txt
+-r api-gateway/requirements-dev.txt
+-r message-service/requirements-dev.txt
