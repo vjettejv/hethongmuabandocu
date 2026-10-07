@@ -1,145 +1,56 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import Swal from 'sweetalert2';
+import { errorMessage } from '../services/contracts';
+import { ErrorNotice } from '../components/Page';
 
-function Register() {
-    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+export default function Register() {
+    const [form, setForm] = useState({ username: '', email: '', password: '' });
     const [otp, setOtp] = useState('');
-    const [step, setStep] = useState(1); // Bước 1: Điền form | Bước 2: Nhập OTP
-
+    const [step, setStep] = useState(1);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
-
-    // XỬ LÝ GỬI FORM ĐĂNG KÝ
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        Swal.fire({ title: 'Đang xử lý...', text: 'Đang gửi email xác nhận', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
+    const register = async () => {
+        if (busy) return;
+        setBusy(true); setError(''); setMessage('');
         try {
-            await api.post('/auth/register', formData);
-            Swal.close();
-            Swal.fire('Thành công!', 'Vui lòng kiểm tra Email để lấy mã OTP', 'success');
-            setStep(2); // Chuyển sang màn hình nhập OTP
-        } catch (error) {
-            Swal.close();
-            Swal.fire('Lỗi', error.response?.data?.message || error.response?.data?.error || 'Không thể đăng ký', 'error');
-        }
+            await api.post('/auth/register', { ...form, username: form.username.trim(), email: form.email.trim() });
+            setStep(2); setOtp(''); setMessage('Yêu cầu gửi mã OTP đã được tiếp nhận. Hãy kiểm tra email của bạn.');
+        } catch (failure) { setError(errorMessage(failure, 'Không thể đăng ký.')); }
+        finally { setBusy(false); }
     };
-
-    // XỬ LÝ XÁC THỰC OTP
-    const handleVerify = async (e) => {
-        e.preventDefault();
+    const verify = async event => {
+        event.preventDefault();
+        if (busy) return;
+        setBusy(true); setError('');
         try {
-            await api.post('/auth/verify-otp', { email: formData.email, otp });
-            Swal.fire({
-                icon: 'success', title: 'Xác thực thành công!', text: 'Bạn có thể đăng nhập!', timer: 2000
-            }).then(() => navigate('/login'));
-        } catch (error) {
-            Swal.fire('Lỗi', error.response?.data?.message || 'Mã OTP sai rồi!', 'error');
-        }
+            await api.post('/auth/verify-otp', { email: form.email.trim(), otp });
+            navigate('/login', { replace: true });
+        } catch (failure) { setError(errorMessage(failure, 'Mã OTP không đúng.')); }
+        finally { setBusy(false); }
     };
-
-    return (
-        <div className="container">
-            <div className="card card-pad" style={{ maxWidth: 520, margin: '0 auto' }}>
-                <div className="toolbar">
-                    <div className="toolbar-grow">
-                        <h2 className="toolbar-title" style={{ margin: 0 }}>
-                            {step === 1 ? 'Đăng ký' : 'Xác thực OTP'}
-                        </h2>
-                        <div className="hint">
-                            {step === 1
-                                ? 'Tạo tài khoản để đăng tin và chat thuận tiện.'
-                                : 'Nhập mã OTP 6 chữ số đã gửi tới email của bạn.'}
-                        </div>
-                    </div>
-                    <button className="btn btn-ghost" type="button" onClick={() => navigate('/')}>
-                        Về trang chủ
-                    </button>
-                </div>
-
-                {step === 1 ? (
-                    <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
-                        <div className="field">
-                            <div className="label">Tên đăng nhập</div>
-                            <input
-                                className="input"
-                                type="text"
-                                placeholder="VD: phamvandat"
-                                required
-                                value={formData.username}
-                                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            />
-                        </div>
-                        <div className="field">
-                            <div className="label">Email</div>
-                            <input
-                                className="input"
-                                type="email"
-                                placeholder="VD: dat@gmail.com"
-                                required
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            />
-                        </div>
-                        <div className="field">
-                            <div className="label">Mật khẩu</div>
-                            <input
-                                className="input"
-                                type="password"
-                                placeholder="Tối thiểu 6 ký tự (khuyến nghị)"
-                                required
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            />
-                        </div>
-
-                        <button className="btn btn-primary" type="submit" style={{ marginTop: 6 }}>
-                            Đăng ký
-                        </button>
-
-                        <div className="hint" style={{ textAlign: 'center', marginTop: 6 }}>
-                            Đã có tài khoản?{' '}
-                            <span style={{ color: 'var(--primary)', fontWeight: 900, cursor: 'pointer' }} onClick={() => navigate('/login')}>
-                                Đăng nhập
-                            </span>
-                        </div>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
-                        <div className="card card-pad" style={{ background: 'rgba(15,23,42,0.03)' }}>
-                            <div className="label">Email nhận OTP</div>
-                            <div className="hint" style={{ marginTop: 6, fontWeight: 900 }}>
-                                {formData.email}
-                            </div>
-                        </div>
-
-                        <div className="field">
-                            <div className="label">Mã OTP</div>
-                            <input
-                                className="input"
-                                type="text"
-                                placeholder="Nhập 6 chữ số"
-                                required
-                                maxLength="6"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                inputMode="numeric"
-                                style={{ textAlign: 'center', fontSize: 18, letterSpacing: 6, fontWeight: 900 }}
-                            />
-                        </div>
-
-                        <button className="btn btn-primary" type="submit">
-                            Xác thực & kích hoạt
-                        </button>
-
-                        <button className="btn btn-ghost" type="button" onClick={() => { setStep(1); setOtp(''); }}>
-                            Gửi lại OTP
-                        </button>
-                    </form>
-                )}
-            </div>
-        </div>
-    );
+    return <div className="container"><section className="card card-pad auth-card">
+        <h1 className="page-title">{step === 1 ? 'Đăng ký' : 'Xác thực OTP'}</h1>
+        <ErrorNotice error={error} />
+        {message && <p className="hint" role="status">{message}</p>}
+        {step === 1 ? <form className="form-stack" onSubmit={event => { event.preventDefault(); register(); }}>
+            <label className="field"><span className="label">Tên đăng nhập</span><input className="input" required autoComplete="username" value={form.username}
+                onChange={event => setForm({ ...form, username: event.target.value })} /></label>
+            <label className="field"><span className="label">Email</span><input className="input" required type="email" autoComplete="email" value={form.email}
+                onChange={event => setForm({ ...form, email: event.target.value })} /></label>
+            <label className="field"><span className="label">Mật khẩu</span><input className="input" required type="password" autoComplete="new-password" value={form.password}
+                onChange={event => setForm({ ...form, password: event.target.value })} /></label>
+            <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Đang đăng ký…' : 'Đăng ký'}</button>
+        </form> : <form className="form-stack" onSubmit={verify}>
+            <p className="hint">Email nhận OTP: {form.email}</p>
+            <label className="field"><span className="label">Mã OTP</span><input className="input" required inputMode="numeric" pattern="[0-9]{6}"
+                maxLength={6} autoComplete="one-time-code" value={otp} onChange={event => setOtp(event.target.value.replace(/[^0-9]/g, ''))} /></label>
+            <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Đang xác thực…' : 'Xác thực và kích hoạt'}</button>
+            <button className="btn btn-ghost" type="button" disabled={busy} onClick={register}>Gửi lại OTP</button>
+            <button className="btn btn-ghost" type="button" disabled={busy} onClick={() => { setStep(1); setError(''); setMessage(''); }}>Sửa thông tin đăng ký</button>
+        </form>}
+        <p className="hint">Đã có tài khoản? <Link to="/login">Đăng nhập</Link></p>
+    </section></div>;
 }
-export default Register;

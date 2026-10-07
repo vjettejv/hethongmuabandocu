@@ -1,9 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 function LogoMark() {
   return (
-    <svg className="brand-mark" viewBox="0 0 40 40" role="img" aria-label="Chá»£ Äá»“ CÅ©">
+    <svg className="brand-mark" viewBox="0 0 40 40" role="img" aria-label="Chợ Đồ Cũ">
       <defs>
         <linearGradient id="docu_grad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="rgb(238,77,45)" />
@@ -21,26 +21,44 @@ function LogoMark() {
 }
 
 export default function Navbar({ session, currentPath, onLogout }) {
-  const navigate = useNavigate();
   const isActive = (prefix) => (prefix === '/' ? currentPath === '/' : currentPath.startsWith(prefix));
 
   const confirmLogout = async () => {
     const result = await Swal.fire({
-      title: 'ÄÄƒng xuáº¥t?',
-      text: 'Báº¡n sáº½ cáº§n Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ tiáº¿p tá»¥c mua bÃ¡n.',
+      title: 'Đăng xuất?',
+      text: 'Bạn sẽ cần đăng nhập lại để tiếp tục mua bán.',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'ÄÄƒng xuáº¥t',
+      confirmButtonText: 'Đăng xuất',
+      cancelButtonText: 'Hủy',
       confirmButtonColor: '#ef4444',
     });
     if (result.isConfirmed) onLogout();
   };
 
   return (
-    <nav className="navbar">
-      <Link to="/">
-        <LogoMark />
-      </Link>
-    </nav>
+    <header className="topbar">
+      <div className="container topbar-inner">
+        <Link to="/" className="brand">
+          <LogoMark />
+          <span className="brand-text"><span className="brand-name">Chợ Đồ Cũ</span><span className="brand-sub">Mua bán đồ cũ</span></span>
+        </Link>
+        <nav className="nav" aria-label="Điều hướng chính">
+          <Link to="/" className={isActive('/') ? 'nav-link active' : 'nav-link'}>Trang chủ</Link>
+          {session.isAuthenticated ? <>
+            <Link to="/my-posts" className="nav-link">Tin của tôi</Link>
+            <Link to="/my-favorites" className="nav-link">Yêu thích</Link>
+            <Link to="/chat" className="nav-link">Tin nhắn</Link>
+            <Link to="/account" className="nav-link">Tài khoản</Link>
+            {session.isAdmin && <Link to="/admin" className="nav-link">Quản trị</Link>}
+            <Link to="/create-post" className="btn btn-primary">Đăng tin</Link>
+            <button type="button" className="btn btn-ghost" onClick={confirmLogout}>Đăng xuất</button>
+          </> : <div className="nav-actions">
+            <Link to="/login" className="btn btn-ghost">Đăng nhập</Link>
+            <Link to="/register" className="btn btn-primary">Đăng ký</Link>
+          </div>}
+        </nav>
+      </div>
+    </header>
   );
 }

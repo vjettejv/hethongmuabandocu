@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '^/(auth|users|posts|categories|messages|notifications|reviews|search|admin|uploads|socket.io)': {
+      '^/(auth|users|posts|categories|favorites|messages|notifications|reviews|search|admin|uploads|socket.io)': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         ws: true
