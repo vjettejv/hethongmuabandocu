@@ -1,342 +1,686 @@
-services:
-  # ==========================================
-  # DATABASES
-  # ==========================================
-  auth-db:
-    image: mysql:8.0
-    container_name: do-cu-auth-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: auth_db
-    ports:
-      - "3307:3306"
-    volumes:
-      - auth_data:/var/lib/mysql
-      - ./seeds/auth_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  user-db:
-    image: mysql:8.0
-    container_name: do-cu-user-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: user_db
-    ports:
-      - "3308:3306"
-    volumes:
-      - user_data:/var/lib/mysql
-      - ./seeds/user_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  post-db:
-    image: mysql:8.0
-    container_name: do-cu-post-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: post_db
-    ports:
-      - "3309:3306"
-    volumes:
-      - post_data:/var/lib/mysql
-      - ./seeds/post_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  category-db:
-    image: mysql:8.0
-    container_name: do-cu-category-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: category_db
-    ports:
-      - "3310:3306"
-    volumes:
-      - category_data:/var/lib/mysql
-      - ./seeds/category_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  message-db:
-    image: mysql:8.0
-    container_name: do-cu-message-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: message_db
-    ports:
-      - "3311:3306"
-    volumes:
-      - message_data:/var/lib/mysql
-      - ./seeds/message_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  review-db:
-    image: mysql:8.0
-    container_name: do-cu-review-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: review_db
-    ports:
-      - "3312:3306"
-    volumes:
-      - review_data:/var/lib/mysql
-      - ./seeds/review_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  search-db:
-    image: mysql:8.0
-    container_name: do-cu-search-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: search_db
-    ports:
-      - "3313:3306"
-    volumes:
-      - search_data:/var/lib/mysql
-      - ./seeds/search_db.sql:/docker-entrypoint-initdb.d/1_init.sql
-    networks:
-      - do-cu-micro-net
-
-  favorite-db:
-    image: mysql:8.0
-    container_name: do-cu-favorite-db
-    command: --lower_case_table_names=1
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: favorite_db
-    ports:
-      - "3314:3306"
-    volumes:
-      - favorite_data:/var/lib/mysql
-    networks:
-      - do-cu-micro-net
-
-
-  # ==========================================
-  # MICROSERVICES
-  # ==========================================
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - AUTH_SERVICE_URL=http://auth-service:3001
-      - USER_SERVICE_URL=http://user-service:3002
-      - POST_SERVICE_URL=http://post-service:3003
-      - CATEGORY_SERVICE_URL=http://category-service:3004
-      - MESSAGE_SERVICE_URL=http://message-service:3005
-      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
-      - REVIEW_SERVICE_URL=http://review-service:3007
-      - SEARCH_SERVICE_URL=http://search-service:3008
-      - FAVORITE_SERVICE_URL=http://favorite-service:3009
-    depends_on:
-      - auth-service
-      - user-service
-      - post-service
-      - category-service
-      - message-service
-      - notification-service
-      - review-service
-      - search-service
-      - favorite-service
-    networks:
-      - do-cu-micro-net
-
-  auth-service:
-    build: ./auth-service
-    container_name: auth-service
-    restart: unless-stopped
-    environment:
-      - PORT=3001
-      - DB_HOST=auth-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=auth_db
-      - JWT_SECRET=supersecret
-      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
-    depends_on:
-      - auth-db
-    networks:
-      - do-cu-micro-net
-
-  user-service:
-    build: ./user-service
-    container_name: user-service
-    restart: unless-stopped
-    environment:
-      - PORT=3002
-      - DB_HOST=user-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=user_db
-    depends_on:
-      - user-db
-    networks:
-      - do-cu-micro-net
-
-  post-service:
-    build: ./post-service
-    container_name: post-service
-    restart: unless-stopped
-    volumes:
-      - shared_uploads:/app/uploads
-    environment:
-      - PORT=3003
-      - DB_HOST=post-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=post_db
-      - CATEGORY_SERVICE_URL=http://category-service:3004
-      - SEARCH_SERVICE_URL=http://search-service:3008
-    depends_on:
-      - post-db
-    networks:
-      - do-cu-micro-net
-
-  category-service:
-    build: ./category-service
-    container_name: category-service
-    restart: unless-stopped
-    environment:
-      - PORT=3004
-      - DB_HOST=category-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=category_db
-    depends_on:
-      - category-db
-    networks:
-      - do-cu-micro-net
-
-  message-service:
-    build: ./message-service
-    container_name: message-service
-    restart: unless-stopped
-    environment:
-      - PORT=3005
-      - DB_HOST=message-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=message_db
-      - AUTH_SERVICE_URL=http://auth-service:3001
-      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
-    depends_on:
-      - message-db
-    networks:
-      - do-cu-micro-net
-
-  notification-service:
-    build: ./notification-service
-    container_name: notification-service
-    volumes:
-      - ./notification-service:/app
-      - /app/node_modules
-    restart: unless-stopped
-    environment:
-
-      - PORT=3006
-      - SMTP_HOST=smtp.gmail.com
-      - SMTP_PORT=587
-      - SMTP_USER=chipxinhgaiii@gmail.com
-      - SMTP_PASS=mnou gnev qrkg yftd
-    networks:
-      - do-cu-micro-net
-
-  review-service:
-    build: ./review-service
-    container_name: review-service
-    restart: unless-stopped
-    volumes:
-      - shared_uploads:/app/uploads
-    environment:
-      - PORT=3007
-      - DB_HOST=review-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=review_db
-    depends_on:
-      - review-db
-    networks:
-      - do-cu-micro-net
-
-  search-service:
-    build: ./search-service
-    container_name: search-service
-    restart: unless-stopped
-    environment:
-      - PORT=3008
-      - DB_HOST=search-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=search_db
-    depends_on:
-      - search-db
-    networks:
-      - do-cu-micro-net
-
-  favorite-service:
-    build: ./favorite-service
-    container_name: favorite-service
-    restart: unless-stopped
-    environment:
-      - PORT=3009
-      - DB_HOST=favorite-db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=favorite_db
-      - POST_SERVICE_URL=http://post-service:3003
-      - JWT_SECRET=supersecret
-    depends_on:
-      - favorite-db
-    networks:
-      - do-cu-micro-net
-
-  # ==========================================
-  # FRONTEND
-  # ==========================================
-  frontend:
-    build: ./do-cu-frontend
-    container_name: do-cu-frontend-micro
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    depends_on:
-      - api-gateway
-    networks:
-      - do-cu-micro-net
-
-volumes:
-  auth_data:
-  user_data:
-  post_data:
-  category_data:
-  message_data:
-  review_data:
-  search_data:
-  favorite_data:
-  shared_uploads:
-
+# Canonical Python stack; existing named data volumes are external.
+name: kientrucpm
 networks:
   do-cu-micro-net:
+    name: kientrucpm_do-cu-micro-net
     driver: bridge
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    depends_on:
+    - auth-service
+    - category-service
+    - favorite-service
+    - message-service
+    - notification-service
+    - post-service
+    - review-service
+    - search-service
+    - user-service
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:3001
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      CONNECT_TIMEOUT: '5'
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost,http://localhost:80,http://127.0.0.1
+      FAVORITE_SERVICE_URL: http://favorite-service:3009
+      MESSAGE_SERVICE_URL: http://message-service:3005
+      NOTIFICATION_SERVICE_URL: http://notification-service:3006
+      PORT: '3000'
+      POST_SERVICE_URL: http://post-service:3003
+      READ_TIMEOUT: '30'
+      REVIEW_SERVICE_URL: http://review-service:3007
+      SEARCH_SERVICE_URL: http://search-service:3008
+      SERVICE_NAME: api-gateway
+      USER_SERVICE_URL: http://user-service:3002
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3000/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3000
+      published: '3000'
+      protocol: tcp
+    restart: unless-stopped
+  auth-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-auth-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: auth_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3307'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: auth_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/auth.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    depends_on:
+    - auth-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,auth-service,auth-service-python,auth-candidate
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost,http://localhost:80,http://127.0.0.1
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: auth-db
+      DB_NAME: auth_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      INTERNAL_HTTP_TIMEOUT: '5'
+      JWT_SECRET: ${JWT_SECRET:?Set existing shared JWT key}
+      NOTIFICATION_SERVICE_URL: http://notification-service:3006
+      PORT: '3001'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: auth-service
+      USER_SERVICE_URL: http://user-service:3002
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3001/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  category-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-category-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: category_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3310'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: category_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/category.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  category-service:
+    build:
+      context: ./category-service
+      dockerfile: Dockerfile
+    container_name: category-service
+    depends_on:
+    - category-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,category-service,category-service-python,category-candidate
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: category-db
+      DB_NAME: category_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      PORT: '3004'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: category-service
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3004/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-category-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  favorite-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-favorite-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: favorite_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3314'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: favorite_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/favorite.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  favorite-service:
+    build:
+      context: ./favorite-service
+      dockerfile: Dockerfile
+    container_name: favorite-service
+    depends_on:
+    - favorite-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,favorite-service,favorite-service-python,favorite-phase5-python
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: favorite-db
+      DB_NAME: favorite_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      DEPENDENCY_TIMEOUT: '3'
+      JWT_SECRET: ${JWT_SECRET:?Set existing shared JWT key}
+      PORT: '3009'
+      POST_SERVICE_URL: http://post-service:3003
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: favorite-service
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3009/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-favorite-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  frontend:
+    build:
+      context: ./do-cu-frontend
+      dockerfile: Dockerfile
+    container_name: do-cu-frontend-micro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1/
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    depends_on:
+    - api-gateway
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 80
+      published: '80'
+      protocol: tcp
+    restart: unless-stopped
+  message-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-message-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: message_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3311'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: message_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/message.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  message-service:
+    build:
+      context: ./message-service
+      dockerfile: Dockerfile
+    container_name: message-service
+    depends_on:
+    - message-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,message-service,message-service-python
+      AUTH_SERVICE_URL: http://auth-service:3001
+      DB_HOST: message-db
+      DB_NAME: message_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEPENDENCY_TIMEOUT: '3'
+      JWT_SECRET: ${JWT_SECRET:?Set existing shared JWT key}
+      NOTIFICATION_SERVICE_URL: http://notification-service:3006
+      PORT: '3005'
+      REALTIME_TIMEOUT: '3'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: message-service
+      USER_SERVICE_URL: http://user-service:3002
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3005/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-message-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,notification-service,notification-service-python
+      MOCK_EMAIL: ${MOCK_EMAIL:-true}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: '3006'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: notification-service
+      SMTP_HOST: ${SMTP_HOST:-smtp.example.com}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_TIMEOUT: '3'
+      SMTP_USER: ${SMTP_USER:-}
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3006/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-notification-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  post-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-post-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: post_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3309'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: post_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/post.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  post-service:
+    build:
+      context: ./post-service
+      dockerfile: Dockerfile
+    container_name: post-service
+    depends_on:
+    - post-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,post-service,post-service-python,post-candidate
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: post-db
+      DB_NAME: post_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      DEPENDENCY_TIMEOUT: '3'
+      JWT_SECRET: ${JWT_SECRET:?Set existing shared JWT key}
+      MESSAGE_SERVICE_URL: http://message-service:3005
+      PORT: '3003'
+      SEARCH_SERVICE_URL: http://search-service:3008
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: post-service
+      UPLOAD_ROOT: /app/uploads
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3003/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-post-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+    user: 0:0
+    volumes:
+    - type: volume
+      source: shared_uploads
+      target: /app/uploads
+  review-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-review-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: review_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3312'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: review_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/review.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  review-service:
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile
+    container_name: review-service
+    depends_on:
+    - review-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,review-service,review-service-python,review-phase5-python
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: review-db
+      DB_NAME: review_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3007'
+      POST_SERVICE_URL: http://post-service:3003
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: review-service
+      UPLOAD_ROOT: /app/uploads
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3007/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-review-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+    user: 0:0
+    volumes:
+    - type: volume
+      source: shared_uploads
+      target: /app/uploads
+  search-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-search-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: search_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3313'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: search_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/search.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  search-service:
+    build:
+      context: ./search-service
+      dockerfile: Dockerfile
+    container_name: search-service
+    depends_on:
+    - search-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,search-service,search-service-python,search-phase5-python
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: search-db
+      DB_NAME: search_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      PORT: '3008'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: search-service
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3008/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-search-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+  user-db:
+    command:
+    - --lower_case_table_names=1
+    container_name: do-cu-user-db
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql -h127.0.0.1 -uroot --silent -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    environment:
+      MYSQL_DATABASE: user_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set existing MySQL root password}
+    image: mysql:8.0
+    networks:
+    - do-cu-micro-net
+    ports:
+    - target: 3306
+      published: '3308'
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: user_data
+      target: /var/lib/mysql
+    - type: bind
+      source: ./seeds/schema/user.sql
+      target: /docker-entrypoint-initdb.d/1_init.sql
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    depends_on:
+    - user-db
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,user-service,user-service-python,user-candidate
+      CORS_ALLOWED_ORIGINS: ''
+      DB_CONNECT_TIMEOUT: '3'
+      DB_HOST: user-db
+      DB_NAME: user_db
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing database password}
+      DB_PORT: '3306'
+      DB_USER: ${PYTHON_DB_USER:?Set existing database user}
+      DEBUG: 'false'
+      JWT_SECRET: ${JWT_SECRET:?Set existing shared JWT key}
+      PORT: '3002'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django secret key}
+      SERVICE_NAME: user-service
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:3002/health',
+        timeout=3)
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 10s
+    image: kientrucpm-user-service-python
+    networks:
+    - do-cu-micro-net
+    restart: unless-stopped
+volumes:
+  auth_data:
+    name: kientrucpm_auth_data
+    external: true
+  category_data:
+    name: kientrucpm_category_data
+    external: true
+  favorite_data:
+    name: kientrucpm_favorite_data
+    external: true
+  message_data:
+    name: kientrucpm_message_data
+    external: true
+  post_data:
+    name: kientrucpm_post_data
+    external: true
+  review_data:
+    name: kientrucpm_review_data
+    external: true
+  search_data:
+    name: kientrucpm_search_data
+    external: true
+  shared_uploads:
+    name: kientrucpm_shared_uploads
+    external: true
+  user_data:
+    name: kientrucpm_user_data
+    external: true
