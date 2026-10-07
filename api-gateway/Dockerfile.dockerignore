@@ -1,0 +1,13 @@
+**
+!requirements.txt
+!requirements.lock.txt
+!app/
+!app/**
+!tests/
+!tests/**
+!pytest.ini
+!Dockerfile
+!Dockerfile.dockerignore
+**/__pycache__
+**/*.pyc
+**/.env*

@@ -1,127 +1,153 @@
-# Đồ Cũ - Microservices Architecture
+# Used Goods Marketplace — Python Microservices
 
-Dự án "Đồ Cũ" đã được tái cấu trúc từ Monolith sang kiến trúc Microservices để đảm bảo khả năng mở rộng (scalability) và dễ dàng bảo trì.
+A marketplace for second-hand goods, with moderated listings, image uploads, search, favorites, seller reviews, and real-time conversations. The React client uses a FastAPI gateway; nine Django services own the business logic. The backend was migrated from Node.js while preserving existing HTTP contracts, MySQL schemas, records, and upload files.
 
-## 🏗 Cấu Trúc Hệ Thống (9 Microservices)
+This is a development/portfolio project. The first [GitHub Actions CI run](https://github.com/vjettejv/hethongmuabandocu/actions/runs/37643230502) passed all three jobs on commit `6ca3c21`. Image publishing is configured; production deployment has not been performed.
 
-Toàn bộ hệ thống được đặt phía sau một **API Gateway** (Port 3000). Các request từ Frontend sẽ gọi tới Gateway và được định tuyến tự động đến các service tương ứng.
+## Architecture
 
-1. `api-gateway`: Cửa ngõ API, định tuyến request và WebSockets (Port 3000).
-2. `auth-service`: Quản lý xác thực (JWT, Login/Register) (Database: `auth-db`).
-3. `user-service`: Quản lý hồ sơ người dùng (Database: `user-db`).
-4. `post-service`: Quản lý bài đăng bán và upload hình ảnh (Database: `post-db`).
-5. `category-service`: Quản lý danh mục (Database: `category-db`).
-6. `message-service`: Chat thời gian thực qua Socket.io (Database: `message-db`).
-7. `notification-service`: Gửi Email (Nodemailer).
-8. `review-service`: Quản lý đánh giá người dùng (Database: `review-db`).
-9. `search-service`: Tìm kiếm và lọc sản phẩm (Database: `search-db`).
+```mermaid
+flowchart LR
+  Browser --> Frontend[React / Nginx :80]
+  Frontend --> Gateway[FastAPI Gateway :3000]
+  Gateway --> Auth[Django Auth]
+  Gateway --> User[Django User]
+  Gateway --> Post[Django Post]
+  Gateway --> Category[Django Category]
+  Gateway --> Favorite[Django Favorite]
+  Gateway --> Review[Django Review]
+  Gateway --> Search[Django Search]
+  Gateway --> Message[Django Message / Socket.IO]
+  Gateway --> Notification[Django Notification / SMTP]
+  Auth --> AuthDB[(auth_db)]
+  User --> UserDB[(user_db)]
+  Post --> PostDB[(post_db)]
+  Category --> CategoryDB[(category_db)]
+  Favorite --> FavoriteDB[(favorite_db)]
+  Review --> ReviewDB[(review_db)]
+  Search --> SearchDB[(search_db)]
+  Message --> MessageDB[(message_db)]
+  Post --> Uploads[(Shared uploads)]
+  Review --> Uploads
+```
 
-- `do-cu-frontend`: Giao diện React/Vite (Port 80).
+| Component | Framework | Internal port | Owned database | Responsibility |
+|---|---|---:|---|---|
+| api-gateway | FastAPI / HTTPX | 3000 | — | HTTP routing and Socket.IO transport proxy |
+| auth-service | Django / DRF | 3001 | auth_db | Registration, OTP, login, JWT |
+| user-service | Django / DRF | 3002 | user_db | User profiles and Auth ID mapping |
+| post-service | Django / DRF | 3003 | post_db | Listings, moderation, image uploads |
+| category-service | Django / DRF | 3004 | category_db | Category lookup and administration |
+| message-service | Django / python-socketio / ASGI | 3005 | message_db | Conversations, persisted notifications, real-time events |
+| notification-service | Django / DRF | 3006 | — | SMTP email delivery and development mock mode |
+| review-service | Django / DRF | 3007 | review_db | Seller reviews and review images |
+| search-service | Django / DRF | 3008 | search_db | MySQL search projection and synchronization |
+| favorite-service | Django / DRF | 3009 | favorite_db | Favorite toggles and listing enrichment |
+| frontend | React 18 / Vite / Nginx | 80 | — | Browser application and reverse proxy |
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án
+Root Compose runs **19 containers: 10 backend + 8 MySQL + 1 frontend/Nginx**. Notification is database-free. There are nine persistent volumes: eight database volumes and one shared upload volume. Node/npm is frontend tooling; the canonical backend runtime is Python.
 
-### Yêu cầu hệ thống
-- **Docker Desktop** đã cài đặt và **đang chạy** (tải tại: https://www.docker.com/products/docker-desktop)
-- **Không cần** cài thêm Node.js, MySQL hay bất kỳ phần mềm nào khác — Docker lo tất cả.
-- RAM khuyến nghị: **8GB trở lên** (hệ thống chạy 17 container cùng lúc).
+## Quick start
 
-### Bước 1: Giải nén
-Giải nén file `.zip` vào một thư mục bất kỳ trên máy.
+Requirements: Git, Docker with Compose v2 and Linux containers, and Python 3.12 for the volume bootstrap helper. Node 18/npm is needed for host frontend development/tests. Allow enough disk space for eleven images and eight MySQL instances; Docker must be running.
 
-### Bước 2: Mở Terminal
-Mở **PowerShell** hoặc **Command Prompt** và di chuyển vào thư mục dự án:
 ```bash
-cd đường-dẫn-tới-thư-mục\KienTrucPM
+cp .env.example .env
 ```
 
-### Bước 3: Build và Khởi Động Hệ Thống
+Fill the blank fields privately. For a **new installation**, choose random `PYTHON_SECRET_KEY`, `JWT_SECRET`, and `MYSQL_ROOT_PASSWORD`; set `PYTHON_DB_USER=root` and `PYTHON_DB_PASSWORD` to that root password. For an **existing installation**, retain its current keys, database credentials, and volumes. Leave `MOCK_EMAIL=true` for local work unless SMTP has been deliberately configured. Never commit `.env`.
+
 ```bash
-docker-compose up --build -d
-```
-- Lần đầu tiên sẽ mất khoảng **3 - 10 phút** (tuỳ tốc độ mạng) để tải image và build.
-- Tham số `-d` giúp hệ thống chạy ngầm ở chế độ background.
-- Đợi đến khi terminal hiện toàn bộ `Started` là xong.
-
-### Bước 4: Import Dữ Liệu Mẫu
-Đợi khoảng **30 giây** sau khi build xong (để Database khởi tạo), rồi chạy:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File migrate.ps1
+python tools/bootstrap_volumes.py --create-missing
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
 ```
 
-Lệnh này sẽ import dữ liệu mẫu (tài khoản, bài đăng, danh mục, tin nhắn) từ file `docu_db (1).sql` vào các Database Microservices.
+Open [the application](http://localhost/) or [gateway API documentation](http://localhost:3000/docs). The bootstrap helper creates missing canonical volumes only. Fresh volumes initialize from `seeds/schema/` with **schema only**, without historical accounts or personal data. Business tables are initially empty; register a new user and create categories/listings through the supported application/API workflow. No private fixture dump is needed. Existing volumes are not reinitialized by MySQL.
 
-### Bước 5: Đồng Bộ Dữ Liệu Tìm Kiếm
+Stop without deleting data:
+
 ```bash
-docker exec post-service node sync-all.js
+docker compose down
 ```
-Lệnh này đồng bộ tất cả bài đăng đã duyệt vào Search Service để chức năng tìm kiếm hoạt động.
 
-### Bước 6: Truy Cập Website
-- **Frontend (Giao diện web):** http://localhost
-- **API Gateway:** http://localhost:3000
+The named data volumes are external. Do not delete or replace them when upgrading an existing installation. Changing `.env` does not change the password already stored in a MySQL volume.
 
-**Tài khoản mẫu** (nếu có trong dữ liệu):
-- Đăng nhập tại giao diện web, tài khoản và mật khẩu tuỳ thuộc vào dữ liệu trong file SQL.
+With mocked email, registration does not send an OTP to your inbox. Open a private database session to verify your own development account:
 
----
-
-## 🛠 Các Lệnh Docker Hữu Ích
-
-**1. Xem trạng thái tất cả container:**
 ```bash
-docker-compose ps
+docker compose exec auth-db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot auth_db'
 ```
 
-**2. Xem logs (lỗi hoặc thông báo) của toàn bộ hệ thống:**
+At the MySQL prompt, query only your own address: `SELECT id, otp FROM users WHERE email='your-own-dev-address@example.invalid';`. Use that OTP on the verification page. Fresh databases have no administrator; moderation requires a deliberately provisioned account with the existing admin role. Real email requires `MOCK_EMAIL=false` and private `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` configuration.
+
+For troubleshooting, inspect `docker compose logs --tail 100 api-gateway post-service`. Start Docker if its daemon is unavailable; rerun the bootstrap helper if an external volume is missing. A fresh, empty marketplace is expected until categories and listings are created. Reload the browser after rebuilding frontend assets. Keep database output, OTPs and private logs local.
+
+## Features and contracts
+
+- Register, verify an OTP, log in, and edit a profile using the preserved JWT contract.
+- Create image-backed listings; moderation follows **pending → approved / rejected**. Only approved listings appear in public results.
+- Browse categories, query search, and save favorites.
+- Review sellers and upload review images.
+- Exchange persisted messages and receive real-time message/notification events.
+- Inspect health, readiness, request-ID logs, and API schemas.
+
+Protected HTTP requests use `Authorization: Bearer <token>`. Profile IDs differ from Auth IDs; resolve their mapping through User. Exact route aliases, request fields and response shapes are recorded in [contracts/endpoints.json](contracts/endpoints.json). Services expose `/health`, `/ready`, `/schema/` and `/docs/` on internal ports; not every port is published to the host.
+
+Socket.IO uses `/socket.io/`. Preserved events are `join_user_room`, `receive_message`, and `receive_notification`; messages are written through HTTP. Message runs **one Uvicorn worker** because room membership lives in process memory. Room identity retains legacy behavior and does not authenticate room access. Multiple workers require a shared Socket.IO manager and verification of room delivery.
+
+## Verification
+
+Create/activate a Python 3.12 virtual environment, then:
+
 ```bash
-docker-compose logs -f
+python -m pip install -r requirements-dev.lock.txt
+python -m pip check
+python tools/verify_foundation.py
+npm ci --prefix do-cu-frontend
+node do-cu-frontend/tests/frontend-contracts.test.js
+npm run build --prefix do-cu-frontend
+python tools/verify_ci.py --validate-only
+python tools/verify_ci.py --smoke
 ```
 
-**3. Xem logs của 1 service cụ thể (ví dụ: api-gateway):**
-```bash
-docker logs api-gateway -f
+`verify_foundation.py` runs Ruff lint/format, checks all nine Django services, imports the gateway, and runs Python unit/contract tests. `verify_ci.py` builds all eleven images and runs the canonical suite against a disposable 19-container stack. Omit `--smoke` for the full 48-case integration suite. It uses generated credentials, schema-only templates, synthetic records, UUID-owned volumes, and a random loopback HTTP port. It does not mount the canonical databases/uploads or require a developer `.env`.
+
+Current checks cover **521 Python unit/contract cases, 11 frontend checks, and 48 full-system cases**. CI uses the unchanged `integration-tests/phase7` suite. It checks authentication, profiles, moderation, uploads, search, favorites, reviews, messages, real-time events, and service health. Use the disposable runner for integration; running multiple eight-database stacks concurrently requires sufficient Docker memory.
+
+Host frontend development uses `npm run dev --prefix do-cu-frontend` with the backend running. Activate a Python 3.12 virtual environment before source checks; on Ubuntu, `mysqlclient` needs a compiler, `pkg-config` and `default-libmysqlclient-dev`. Contract checks read the original Node baseline through Git history, so use a full clone rather than a shallow clone.
+
+## CI and image release configuration
+
+[CI](.github/workflows/ci.yml) checks pull requests and pushes to `develop`/`main`: Python 3.12 quality, frontend install/contracts/build, and isolated Docker integration. Pull requests run the critical smoke selection; branch/manual/release validation runs the full selection. Dependencies are locked and actions are pinned by commit SHA.
+
+[Docker images](.github/workflows/docker-publish.yml) validates CI before building ten backend images plus frontend for GHCR. Version tags such as `v1.2.3` enable publication; manual dispatch defaults to build-only. Names are `ghcr.io/vjettejv/hethongmuabandocu-<service>`, with version and full commit-SHA tags; stable version releases also receive `latest`. These workflows build and validate images; deployment is separate. CI uploads only JUnit XML and a non-sensitive result summary for seven days.
+
+## Known limitations
+
+- Development Compose is not a production deployment; TLS, centralized secrets, monitoring, scaling, and backup/restore operations need separate deployment work.
+- JWT/OTP and room authorization retain compatibility behavior; Socket.IO room identity is not a hardened authentication boundary.
+- Category creation and notification writes retain legacy access boundaries; not every administrative alias has uniform authorization.
+- Search synchronization is best-effort; existing projection drift is audited and preserved rather than silently rebuilt.
+- Message room state supports one worker. There is no Redis/shared Socket.IO manager.
+- File retention on listing/review deletion follows existing contracts; shared storage is not an object-storage system.
+- SMTP is mocked by default. External mail delivery requires separately supplied credentials and testing.
+- Node 18 remains the existing frontend toolchain; upgrading it is outside this migration phase.
+- The existing frontend dependency audit reports 17 advisories (1 low, 7 moderate, 9 high); dependency upgrades require separate compatibility checks.
+
+## Repository guide
+
+```text
+.github/workflows/       CI and image publishing configuration
+api-gateway/            FastAPI gateway
+*-service/              Nine Django business services
+do-cu-frontend/         React/Vite source and Nginx image
+seeds/schema/           Empty-volume schema initialization
+contract-tests/         Contract and final tooling checks
+integration-tests/      Current Python full-system integration suite
+tools/                  Verification, bootstrap, and safety helpers
+docker-compose.yml      Canonical Python-only runtime
 ```
 
-**4. Tắt hệ thống:**
-```bash
-docker-compose down
-```
-
-**5. Tắt hệ thống và xóa sạch toàn bộ Database (Reset dữ liệu):**
-```bash
-docker-compose down -v
-```
-
-**6. Khởi động lại sau khi đã build (nhanh hơn):**
-```bash
-docker-compose up -d
-```
-
----
-
-## 🔧 Lưu Ý Quan Trọng
-
-### Cấu hình Frontend
-Frontend đã được cấu hình sẵn trỏ về API Gateway. File `.env`:
-```
-VITE_API_URL=http://localhost:3000
-```
-Mọi API đều gọi qua cổng `3000` này.
-
-### Xử lý sự cố thường gặp
-| Lỗi | Nguyên nhân | Cách sửa |
-|---|---|---|
-| `port is already allocated` | Cổng đã bị ứng dụng khác chiếm | Tắt ứng dụng đang dùng cổng đó, hoặc đổi port trong `docker-compose.yml` |
-| `migrate.ps1 cannot be loaded` | PowerShell chặn script | Chạy: `powershell -ExecutionPolicy Bypass -File migrate.ps1` |
-| Database trống sau migrate | Container DB chưa kịp khởi tạo | Đợi 30s rồi chạy lại `migrate.ps1` |
-| Tìm kiếm không có kết quả | Chưa sync dữ liệu Search | Chạy: `docker exec post-service node sync-all.js` |
-## 📦 Phien Ban Release v1.0.0
-- Tich hop toan bo cac microservices.
-- Giao dien nguoi dung hoan thien.
-- Ho tro chat thoi gian thuc va thong bao.
-
-
-### ⚠️ Hotfix v1.0.1
-- Va loi phan quyen admin truy cap trang duyet tin.
-
+See the [frontend README](do-cu-frontend/README.md), [contract inventory](contracts/README.md), and [contract test README](contract-tests/README.md). Removed migration reports, retired Node parity fixtures and old Compose overlays remain recoverable from Git history at `6ca3c21`. Current startup and verification instructions are kept here.

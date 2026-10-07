@@ -1,0 +1,16 @@
+{
+  "provenance": "Synthetic shape example; token is deliberately invalid.",
+  "request": {
+    "username": "fixture_user",
+    "password": "synthetic-password-not-an-account"
+  },
+  "response": {
+    "token": "synthetic-token-not-valid",
+    "user": {
+      "id": 101,
+      "username": "fixture_user",
+      "email": "fixture@example.invalid",
+      "roleId": 1
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "phase": 4,
+  "runtime": "Django DRF",
+  "port": 3003,
+  "database": "post_db",
+  "tables": ["posts", "images"],
+  "managed": false,
+  "jwt": {"algorithm": "HS256", "identity": "id", "adminRoleCheck": false},
+  "routes": [
+    {"method": "GET", "external": "/posts", "internal": "/", "response": "Post[]", "protected": false},
+    {"method": "GET", "external": "/posts/my-posts", "internal": "/my-posts", "response": "Post[]", "protected": true},
+    {"method": "GET", "external": "/posts/:id", "internal": "/:id", "response": "Post", "protected": false},
+    {"method": "POST", "external": "/posts", "internal": "/", "response": "{message,post}", "protected": true},
+    {"method": "DELETE", "external": "/posts/:id", "internal": "/:id", "response": "{message:Deleted successfully}", "protected": true},
+    {"method": "GET", "external": "/admin/posts", "internal": "/admin/posts", "response": "{data:Post[]}", "protected": true},
+    {"method": "PUT", "external": "/admin/posts/:id", "internal": "/admin/posts/:id", "response": "{data:Post}", "protected": true},
+    {"method": "DELETE", "external": "/admin/posts/:id", "internal": "/admin/posts/:id", "response": "{message:Deleted}", "protected": true},
+    {"method": "GET", "external": "/uploads/*", "internal": "/uploads/*", "response": "binary", "protected": false}
+  ],
+  "aliases": ["/posts/admin/posts", "/posts/admin/posts/:id"],
+  "query": {"filters": ["categoryId", "keyword", "status"], "keyword": "SQL LIKE with %/_ wildcards", "order": "createdAt DESC", "pagination": false, "approvedByDefault": false},
+  "serialization": {"queryPrice": "number", "createPrice": "original input type", "adminUpdatePrice": "fixed 2 decimal string", "queryIncludes": ["Images", "Category"], "createIncludes": [], "adminUpdateIncludes": ["Images"], "timestamps": "UTC ISO milliseconds Z"},
+  "upload": {"root": "/app/uploads", "volume": "shared_uploads", "field": "images", "maxFiles": 5, "storedUrl": "/uploads/<timestamp>-<basename>", "ownerDeleteUnlinksFiles": false, "adminDeleteUnlinksFiles": false},
+  "sideEffects": {"create": ["Category GET", "Search POST /sync"], "ownerDelete": ["Category GET", "Search POST /sync status=deleted imageUrl=null"], "moderation": ["Category GET", "Search POST /sync", "Message POST /notifications on transition to approved/rejected"], "adminDelete": [], "delivery": "bounded asynchronous best-effort HTTP; no durable queue"},
+  "intentionalDivergences": ["Bearer HS256 only", "controlled unexpected/malformed errors", "atomic Post/Image writes and owned-file cleanup on failure", "safe basename, no collision overwrite, containment and dotfile checks", "chunked bodies spool to disk with 50 MiB body cap", "single range invalid bounds return 416", "dependency timeout and finite in-process delivery capacity"],
+  "deferredDebt": ["admin has no role check", "arbitrary file MIME allowed", "physical files retained on delete", "admin delete can leave stale Search", "non-durable async sync", "local Post container retains legacy root upload permissions"]
+}

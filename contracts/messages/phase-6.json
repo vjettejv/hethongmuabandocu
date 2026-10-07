@@ -1,0 +1,6 @@
+{
+  "endpoints": ["GET /messages/contacts", "GET /messages/:contactId", "POST /messages", "POST /messages/notifications", "GET /messages/notifications", "PUT /messages/notifications/read-all"],
+  "tables": ["message_db.messages", "message_db.notifications"],
+  "socket": {"path": "/socket.io/", "events": ["join_user_room", "receive_message", "receive_notification"], "room": "user_<id>", "auth": "deferred", "workers": 1},
+  "intentionalBugFix": "Static GET notifications dispatches intended newest-first max-50 list, replacing legacy shadowed history route"
+}

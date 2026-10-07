@@ -1,0 +1,12 @@
+{
+  "endpoints": [
+    "GET /search",
+    "POST /search/sync"
+  ],
+  "public": true,
+  "primaryKey": "postId",
+  "idAlias": "postId",
+  "price": "DECIMAL string or null",
+  "filter": "approved only",
+  "sync": "upsert supplied fields"
+}

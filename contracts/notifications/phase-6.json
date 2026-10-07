@@ -1,0 +1,9 @@
+{
+  "endpoints": ["POST /notifications/email"],
+  "internal": "POST /email",
+  "database": false,
+  "mockWhen": "NODE_ENV != production OR MOCK_EMAIL == true OR SMTP_USER missing",
+  "mockResponse": {"message": "Email queued (Mock)", "mock": true},
+  "smtpResponse": {"message": "Email sent successfully", "messageId": "generated"},
+  "smtp": "secure=false; STARTTLS when advertised; authenticated synchronous delivery"
+}

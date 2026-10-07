@@ -1,16 +1,14 @@
-# React + Vite
+# Marketplace frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 / Vite browser client for the canonical FastAPI/Django marketplace. Node/npm is build and test tooling. The production-style local container builds static assets and serves them through Nginx, which proxies HTTP and `/socket.io/` to the gateway.
 
-Currently, two official plugins are available:
+```bash
+npm ci
+node tests/frontend-contracts.test.js
+npm run build
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Use the existing Node 18 toolchain. Start the backend with root Compose before host development. See the [root README](../README.md) for environment setup, architecture, API contracts and verification.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Private `.env*` files are excluded from the Docker context; `.env.example` is the documented example. Frontend build variables are public compiled configuration and must never contain backend signing keys, database credentials, or SMTP secrets.

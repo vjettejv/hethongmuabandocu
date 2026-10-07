@@ -1,0 +1,28 @@
+{
+  "implemented": true,
+  "baseline": "compatibility.json and ../endpoints.json",
+  "endpoints": [
+    "POST /auth/register", "POST /auth/login", "POST /auth/verify-otp",
+    "GET /auth/:id", "POST /auth/verify"
+  ],
+  "jwt": {"algorithm": "HS256", "claims": ["id", "roleId", "iat", "exp"], "ttl_seconds": 86400},
+  "bcrypt": {"cost": 10, "accepted_prefixes": ["$2a$", "$2b$"], "utf8_byte_limit": 72},
+  "compatibility_choices": {
+    "unverified_login_allowed": true,
+    "unverified_registration_reuses_account_id": true,
+    "downstream_failures_are_best_effort": true,
+    "refresh_or_reset_endpoints_added": false
+  },
+  "intentional_divergences": [
+    "Hardcoded OTP bypass removed.",
+    "A nonempty stored OTP is required; empty/cleared OTP cannot verify.",
+    "Wrong OTP returns 400 with readable error rather than mojibake/500.",
+    "Auth verify requires Bearer transport and HS256; non-Bearer token rejected.",
+    "Malformed login credentials return controlled 401; registration requires string fields.",
+    "Database errors return generic 500 without raw DB details.",
+    "Downstream calls have bounded timeouts and no automatic write retries."
+  ],
+  "tests": "integration-tests/phase2/test_auth_parity.py",
+  "real_password_hashes_copied": false,
+  "schema_migrations_performed": false
+}
