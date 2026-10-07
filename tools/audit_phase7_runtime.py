@@ -7,8 +7,7 @@ import re
 from pathlib import Path
 
 import yaml
-from legacy_reference import SERVICES
-from verify_runtime import command
+from verify_runtime import SERVICES, command
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / ".artifacts/phase7"
@@ -83,8 +82,6 @@ def main():
             name.startswith("docker-compose.phase") and not name.endswith(".e2e.yml")
         ):
             classification = "opt-in parity/recovery/test tooling"
-        elif name == "package.ps1":
-            classification = "export helper excluding dependency caches"
         elif name.split("/")[0] in SERVICES and path.suffix == ".py":
             classification = "Python compatibility comments/literals; no Node entrypoint"
         else:

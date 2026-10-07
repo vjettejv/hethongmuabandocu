@@ -9,6 +9,6 @@ npm run build
 npm run dev
 ```
 
-Use the existing Node 18 toolchain. Start the backend with root Compose before host development. See [root README](../README.md), [development guide](../docs/development.md), and [API guide](../docs/api.md) for environment setup and contracts.
+Use the existing Node 18 toolchain. Start the backend with root Compose before host development. See the [root README](../README.md) for environment setup, architecture, API contracts and verification.
 
 Private `.env*` files are excluded from the Docker context; `.env.example` is the documented example. Frontend build variables are public compiled configuration and must never contain backend signing keys, database credentials, or SMTP secrets.

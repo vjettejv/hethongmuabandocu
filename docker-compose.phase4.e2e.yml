@@ -1,8 +1,0 @@
-# Temporary LAST overlay for canonical Post E2E. Existing Search next-ID slot
-# is occupied; route synthetic side effects to unchanged Node schema clones.
-# Remove this overlay and recreate only Post after E2E verification.
-services:
-  post-service:
-    environment:
-      SEARCH_SERVICE_URL: http://dependencies-python:3010
-      MESSAGE_SERVICE_URL: http://dependencies-python:3010

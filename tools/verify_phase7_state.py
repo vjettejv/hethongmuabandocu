@@ -6,8 +6,8 @@ import json
 import subprocess
 from pathlib import Path
 
-import verify_phase5_state
-from verify_phase4_uploads import inventory
+from data_snapshot import content_snapshot
+from upload_inventory import inventory
 from verify_runtime import SERVICES, command, snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,10 +19,9 @@ def save(name, value):
 
 
 def preservation():
-    verify_phase5_state.ARTIFACTS = ARTIFACTS
     for name, current in (
         ("db-before.json", snapshot()),
-        ("db-content-before.json", verify_phase5_state.content_snapshot()),
+        ("db-content-before.json", content_snapshot(ARTIFACTS)),
         ("uploads-before.json", inventory()),
     ):
         assert current == json.loads((ARTIFACTS / name).read_text()), name + " changed"

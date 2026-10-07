@@ -1,22 +1,21 @@
-# Contract test scaffolding
+# Contract and tooling checks
 
-Run through `python tools/verify_foundation.py` or, from this directory,
-`python -m pytest -q` using the Python 3.12 development environment.
+Run from this directory with the Python 3.12 development environment:
 
-Tests verify source inventory completeness against Node route registrations, unique
-contract identifiers, synthetic fixture constraints and the response comparator.
-No live Node/Python business endpoint comparison is executed in Phase 1.
+```bash
+python -m pytest -q
+```
 
-`parity.py` compares status, important header values, JSON keys and types. It ignores
-generated values by design and distinguishes integer/number/string/boolean/null.
-Array shape comparison needs populated controlled fixtures; empty arrays do not prove
-item compatibility. Non-JSON body text comparison should be added when a specific
-business contract requires it. It is a scaffold, not a full JSON Schema validator.
+The 28 checks cover route inventory, unique contract IDs, synthetic fixtures,
+response comparison, CI configuration and isolated test-runner safeguards.
+They also run through `python tools/verify_foundation.py` from the repository root.
 
-`fetch_read_only` only exposes GET, uses a bounded timeout and follows no redirects.
-Future phase tests can call explicit NODE_BASE_URL/PYTHON_BASE_URL targets with controlled
-synthetic data. Writes, JWT issuance, OTP/email and destructive operations must use an
-isolated test environment and explicit opt-in, never baseline user data.
+The route oracle reads the recorded Node baseline with `git show`; retain full Git
+history when cloning. No retired Node backend is started by these tests.
 
-Foundation health is tested independently in each service; Node health text is not
-expected to equal Python JSON. Business parity tests belong to Phases 2–7.
+`parity.py` compares status, important headers, JSON keys and value types while
+ignoring generated values. Its compact shape comparator is not a full JSON Schema
+validator. Live business behavior is covered separately by the 48-case integration
+suite, run with `python tools/verify_ci.py` against disposable data.
+
+See the [root README](../README.md) and [contract inventory](../contracts/README.md).

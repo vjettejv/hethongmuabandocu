@@ -118,13 +118,13 @@ def check_http():
                 "--filter",
                 f"label=com.docker.compose.project={PROJECT}",
                 "--filter",
-                f"label=com.docker.compose.service={service}-python",
+                f"label=com.docker.compose.service={service}",
                 "--format",
                 "{{.ID}}",
             ]
         ).strip()
         if not container:
-            raise RuntimeError(f"Missing foundation container: {service}")
+            raise RuntimeError(f"Missing canonical container: {service}")
         probe = (
             "import json, urllib.request; "
             f"service={service!r}; port={port}; "

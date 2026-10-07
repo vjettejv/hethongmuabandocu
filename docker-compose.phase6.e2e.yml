@@ -1,6 +1,0 @@
-# Guarded canonical Post/Search tests: never write the pre-existing projection.
-# No shared-upload changes are needed; E2E posts have no image uploads.
-services:
-  search-service:
-    environment:
-      DB_NAME: phase6_search_e2e

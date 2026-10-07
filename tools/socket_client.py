@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class SocketClient:
     def __init__(self):
         self.process = subprocess.Popen(
-            ["node", str(ROOT / "tools/runtime/phase6-socket-client.cjs")],
+            ["node", str(ROOT / "tools/runtime/socket-client.cjs")],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

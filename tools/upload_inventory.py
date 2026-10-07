@@ -6,25 +6,8 @@ from pathlib import Path
 
 from verify_runtime import command
 
-SCRIPT = r"""
-const fs=require('fs'),path=require('path'),crypto=require('crypto');
-const root='/app/uploads', result={};
-function visit(dir) {
- for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
-  const filename=path.join(dir,entry.name), relative=path.relative(root,filename);
-  if (entry.isDirectory()) visit(filename);
-  else if (entry.isFile()) {
-   const data=fs.readFileSync(filename);
-   result[relative]={size:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')};
-  } else if (entry.isSymbolicLink()) result[relative]={symlink:fs.readlinkSync(filename)};
- }
-}
-visit(root); process.stdout.write(JSON.stringify(result));
-"""
-
 
 def inventory():
-    # Post remains the canonical static server through Review's Phase 5 cutover.
     script = """
 import hashlib,json,pathlib
 root=pathlib.Path('/app/uploads'); result={}

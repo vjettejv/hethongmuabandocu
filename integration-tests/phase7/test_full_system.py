@@ -15,10 +15,9 @@ import httpx
 import jwt
 import pytest
 from conftest import ROOT
-from phase6_socket import SocketClient
-from verify_phase4_runtime import literal
-from verify_phase4_uploads import inventory
-from verify_phase6_runtime import environment, private_logs, wait_for
+from integration_helpers import environment, literal, private_logs, wait_for
+from socket_client import SocketClient
+from upload_inventory import inventory
 from verify_runtime import SERVICES, command, select
 
 ARTIFACTS = Path(os.environ.get("CANONICAL_TEST_ARTIFACTS", ROOT / ".artifacts/phase7"))
