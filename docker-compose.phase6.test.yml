@@ -1,0 +1,372 @@
+# Owned clones, localhost-only published ports, synthetic SMTP only.
+services:
+  message-phase6-node:
+    profiles:
+    - phase6-test
+    image: kientrucpm-message-service
+    ports:
+    - 127.0.0.1::3005
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      NODE_OPTIONS: --require /app/phase3-reference-preload.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+      PORT: '3005'
+      SERVICE_NAME: message-service
+      DB_HOST: message-db
+      DB_NAME: phase6_message_node
+      AUTH_SERVICE_URL: http://dependencies-phase6-node:3011/auth
+      USER_SERVICE_URL: http://dependencies-phase6-node:3011/users
+      NOTIFICATION_SERVICE_URL: http://dependencies-phase6-node:3011
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+    - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+    - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    - ./tools/runtime/phase3-reference-preload.cjs:/app/phase3-reference-preload.cjs:ro
+  dependencies-phase6-node:
+    profiles:
+    - phase6-test
+    image: kientrucpm-message-service
+    ports:
+    - 127.0.0.1::3011
+    environment:
+      AUTH_SERVICE_URL: http://auth-phase6:3001
+      USER_SERVICE_URL: http://user-phase6:3002
+      NOTIFICATION_SERVICE_URL: http://notification-phase6-python:3006
+      SEARCH_SERVICE_URL: http://search-phase6:3008
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./tools/runtime/phase6-dependencies.cjs:/fixtures/dependencies.cjs:ro
+    command:
+    - node
+    - /fixtures/dependencies.cjs
+  notification-phase6-node:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-service
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: development
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+    networks:
+    - do-cu-micro-net
+  notification-phase6-node-production-mock:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-service
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'true'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+    networks:
+    - do-cu-micro-net
+  notification-phase6-node-missing-user:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-service
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: ''
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+    networks:
+    - do-cu-micro-net
+  notification-phase6-node-smtp:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-service
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+    networks:
+    - do-cu-micro-net
+  message-phase6-python:
+    profiles:
+    - phase6-test
+    image: kientrucpm-message-python-phase6
+    ports:
+    - 127.0.0.1::3005
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3005'
+      SERVICE_NAME: message-service
+      DB_HOST: message-db
+      DB_NAME: phase6_message_python
+      AUTH_SERVICE_URL: http://dependencies-phase6-python:3011/auth
+      USER_SERVICE_URL: http://dependencies-phase6-python:3011/users
+      NOTIFICATION_SERVICE_URL: http://dependencies-phase6-python:3011
+    networks:
+    - do-cu-micro-net
+  dependencies-phase6-python:
+    profiles:
+    - phase6-test
+    image: kientrucpm-message-service
+    ports:
+    - 127.0.0.1::3011
+    environment:
+      AUTH_SERVICE_URL: http://auth-phase6:3001
+      USER_SERVICE_URL: http://user-phase6:3002
+      NOTIFICATION_SERVICE_URL: http://notification-phase6-python:3006
+      SEARCH_SERVICE_URL: http://search-phase6:3008
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./tools/runtime/phase6-dependencies.cjs:/fixtures/dependencies.cjs:ro
+    command:
+    - node
+    - /fixtures/dependencies.cjs
+  notification-phase6-python:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-python-phase6
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: development
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      SERVICE_NAME: notification-service
+    networks:
+    - do-cu-micro-net
+  notification-phase6-python-production-mock:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-python-phase6
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'true'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      SERVICE_NAME: notification-service
+    networks:
+    - do-cu-micro-net
+  notification-phase6-python-missing-user:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-python-phase6
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: ''
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      SERVICE_NAME: notification-service
+    networks:
+    - do-cu-micro-net
+  notification-phase6-python-smtp:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-python-phase6
+    ports:
+    - 127.0.0.1::3006
+    environment:
+      PORT: '3006'
+      NODE_ENV: production
+      MOCK_EMAIL: 'false'
+      SMTP_HOST: smtp-phase6
+      SMTP_PORT: '2525'
+      SMTP_USER: sender@phase6.local.test
+      SMTP_PASS: synthetic-test-only
+      SMTP_TIMEOUT: '3'
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      SERVICE_NAME: notification-service
+    networks:
+    - do-cu-micro-net
+  auth-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-auth-service
+    ports:
+    - 127.0.0.1::3001
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3001'
+      SERVICE_NAME: auth-service
+      DB_HOST: auth-db
+      DB_NAME: phase6_auth_test
+      USER_SERVICE_URL: http://user-phase6:3002
+      NOTIFICATION_SERVICE_URL: http://notification-phase6-python:3006
+    networks:
+    - do-cu-micro-net
+  user-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-user-python-phase3
+    ports:
+    - 127.0.0.1::3002
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3002'
+      SERVICE_NAME: user-service
+      DB_HOST: user-db
+      DB_NAME: phase6_user_test
+    networks:
+    - do-cu-micro-net
+  search-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-search-python-phase5
+    ports:
+    - 127.0.0.1::3008
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3008'
+      SERVICE_NAME: search-service
+      DB_HOST: search-db
+      DB_NAME: phase6_search_test
+    networks:
+    - do-cu-micro-net
+  post-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-post-python-phase4
+    ports:
+    - 127.0.0.1::3003
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      DB_PORT: '3306'
+      ALLOWED_HOSTS: '*'
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3003'
+      SERVICE_NAME: post-service
+      DB_HOST: post-db
+      DB_NAME: phase6_post_test
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      SEARCH_SERVICE_URL: http://dependencies-phase6-python:3011
+      MESSAGE_SERVICE_URL: http://message-phase6-python:3005
+      UPLOAD_ROOT: /tmp/phase6_uploads
+    networks:
+    - do-cu-micro-net
+  gateway-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-api-gateway
+    ports:
+    - 127.0.0.1::3000
+    environment:
+      PORT: '3000'
+      SERVICE_NAME: api-gateway
+      MESSAGE_SERVICE_URL: http://message-phase6-python:3005
+      NOTIFICATION_SERVICE_URL: http://notification-phase6-python:3006
+      AUTH_SERVICE_URL: http://auth-phase6:3001
+      USER_SERVICE_URL: http://user-phase6:3002
+      POST_SERVICE_URL: http://post-phase6:3003
+      CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:5173
+    networks:
+    - do-cu-micro-net
+  smtp-phase6:
+    profiles:
+    - phase6-test
+    image: kientrucpm-notification-service
+    ports:
+    - 127.0.0.1::3012
+    environment: {}
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./tools/runtime/phase6-smtp.cjs:/fixtures/smtp.cjs:ro
+    command:
+    - node
+    - /fixtures/smtp.cjs

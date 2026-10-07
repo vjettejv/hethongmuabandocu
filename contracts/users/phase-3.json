@@ -1,0 +1,32 @@
+{
+  "phase": 3,
+  "implemented": true,
+  "service": "user-service",
+  "database": "user_db",
+  "table": "userprofiles",
+  "identity": "authId references Auth users.id logically; never use profile.id for ownership",
+  "externalFields": ["id", "authId", "fullName", "phone", "address", "avatar", "createdAt", "updatedAt"],
+  "endpoints": {
+    "GET /users/me": {"authentication": "local HS256 Bearer JWT", "success": 200, "missingProfile": {}},
+    "GET /users/{authId}": {"authentication": "public legacy", "success": 200, "missing": {"status": 404, "body": {"error": "Profile not found"}}},
+    "PUT /users/me": {"authentication": "local HS256 Bearer JWT", "success": 200, "identity": "claims.id"},
+    "PUT /users/{authId}": {"authentication": "public legacy", "success": 200, "identity": "URL authId"}
+  },
+  "update": {
+    "fields": ["fullName", "phone", "address", "avatar"],
+    "unknownFields": "ignored, including id and authId",
+    "omitted": "preserve existing value; new profile defaults null",
+    "null": "write null",
+    "emptyString": "write empty string",
+    "missingProfile": "find-or-create; immediate create response omits unspecified fields, later GET includes nulls",
+    "createAuthIdType": "URL PUT echoes decimal string; /me PUT uses numeric JWT id; later DB lookup returns number",
+    "unchangedValues": "do not advance updatedAt"
+  },
+  "timestamps": "UTC ISO 8601 milliseconds with Z; legacy DATETIME reloads at second precision",
+  "intentionalDivergences": [
+    "Only Bearer and HS256 accepted; legacy middleware accepted other schemes/HS algorithms",
+    "Malformed profile field types and noninteger identities return controlled errors",
+    "Unexpected DB errors are sanitized; GET /me still preserves empty 200 for lookup failures"
+  ],
+  "deferredSecurityDebt": ["public GET/PUT /users/{authId}"]
+}

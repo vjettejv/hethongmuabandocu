@@ -1,0 +1,110 @@
+{
+  "AuthUser": {
+    "id": "integer",
+    "username": "string",
+    "email": "string",
+    "roleId": "integer"
+  },
+  "JwtClaims": {
+    "id": "integer",
+    "roleId": "integer",
+    "iat": "integer",
+    "exp": "integer"
+  },
+  "Profile": {
+    "id": "integer",
+    "authId": "integer",
+    "fullName": "string|null",
+    "phone": "string|null",
+    "address": "string|null",
+    "avatar": "string|null",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "Category": {
+    "id": "integer",
+    "name": "string",
+    "description": "string|null",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "PostRaw": {
+    "id": "integer",
+    "userId": "integer",
+    "categoryId": "integer",
+    "title": "string",
+    "description": "string|null",
+    "price": "number|string (ORM/create dependent)",
+    "status": "string",
+    "condition": "string|null",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp",
+    "Images?": "Image[]"
+  },
+  "PostQuery": {
+    "extends": "PostRaw",
+    "price": "number",
+    "Images": "Image[]",
+    "Category": "Category or {id,name} fallback"
+  },
+  "Image": {
+    "id": "integer",
+    "postId": "integer",
+    "imageUrl": "/uploads/<filename>",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "Message": {
+    "id": "integer",
+    "senderId": "integer",
+    "receiverId": "integer",
+    "content": "string",
+    "isRead": "boolean",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "Notification": {
+    "id": "integer",
+    "userId": "integer",
+    "title": "string",
+    "message": "string",
+    "isRead": "boolean",
+    "link": "string|null",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "Contact": {
+    "id": "integer",
+    "lastMessage": "Message",
+    "user": "{id,fullName?,username}"
+  },
+  "Review": {
+    "id": "integer",
+    "reviewerId": "integer",
+    "revieweeId": "integer",
+    "postId": "integer|null",
+    "rating": "integer 1..5",
+    "comment": "string|null",
+    "imageUrl": "string|null",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "SearchIndex": {
+    "postId": "integer",
+    "id": "integer (=postId)",
+    "title": "string",
+    "description": "string|null",
+    "price": "decimal string|null (raw ORM)",
+    "categoryId": "integer|null",
+    "imageUrl": "string|null",
+    "categoryName": "string|null",
+    "status": "approved",
+    "createdAt": "ISO timestamp",
+    "updatedAt": "ISO timestamp"
+  },
+  "EmailResult": {
+    "message": "string",
+    "mock?": "boolean",
+    "messageId?": "string"
+  }
+}

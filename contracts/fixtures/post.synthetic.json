@@ -1,0 +1,25 @@
+{
+  "id": 201,
+  "userId": 101,
+  "categoryId": 301,
+  "title": "Synthetic item",
+  "description": "Fixture only",
+  "price": 125000.0,
+  "status": "approved",
+  "condition": "used",
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "Images": [
+    {
+      "id": 401,
+      "postId": 201,
+      "imageUrl": "/uploads/synthetic-image.png",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "Category": {
+    "id": 301,
+    "name": "Synthetic category"
+  }
+}

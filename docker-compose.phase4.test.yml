@@ -1,0 +1,156 @@
+# All fixture schemas/volumes are isolated from canonical business data.
+x-node: &node
+  DB_USER: ${PYTHON_DB_USER:?Set existing DB user}
+  DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set existing DB password}
+  JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+  NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+  LEGACY_SCHEMA_SYNC: disabled
+services:
+  post-reference:
+    profiles: [phase4-test]
+    image: kientrucpm-post-node-reference
+    build: {context: ./.artifacts/phase7/legacy/post-service, dockerfile: Dockerfile}
+    ports: ["127.0.0.1::3003"]
+    environment:
+      <<: *node
+      PORT: '3003'
+      DB_HOST: post-db
+      DB_NAME: phase4_post_node
+      CATEGORY_SERVICE_URL: http://dependencies-node:3010/category
+      SEARCH_SERVICE_URL: http://dependencies-node:3010
+      MESSAGE_SERVICE_URL: http://dependencies-node:3010
+    volumes:
+      - ./.artifacts/phase7/legacy/post-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/post-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - phase4_uploads_node:/app/uploads
+    networks: [do-cu-micro-net]
+  post-candidate:
+    profiles: [phase4-test]
+    image: kientrucpm-post-python-phase4
+    user: '0:0'
+    ports: ["127.0.0.1::3003"]
+    environment:
+      PORT: '3003'
+      SERVICE_NAME: post-service
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+      DB_HOST: post-db
+      DB_NAME: phase4_post_python
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      ALLOWED_HOSTS: localhost,127.0.0.1,post-candidate
+      UPLOAD_ROOT: /app/uploads
+      DEPENDENCY_TIMEOUT: '1'
+      CATEGORY_SERVICE_URL: http://dependencies-python:3010/category
+      SEARCH_SERVICE_URL: http://dependencies-python:3010
+      MESSAGE_SERVICE_URL: http://dependencies-python:3010
+    volumes: [phase4_uploads_python:/app/uploads]
+    networks: [do-cu-micro-net]
+  search-phase4-node:
+    profiles: [phase4-test]
+    image: kientrucpm-search-service
+    environment:
+      <<: *node
+      PORT: '3008'
+      DB_HOST: search-db
+      DB_NAME: phase4_search_node
+    ports: ["127.0.0.1::3008"]
+    volumes:
+      - ./.artifacts/phase7/legacy/search-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/search-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks: [do-cu-micro-net]
+  search-phase4-python:
+    profiles: [phase4-test]
+    image: kientrucpm-search-service
+    environment:
+      <<: *node
+      PORT: '3008'
+      DB_HOST: search-db
+      DB_NAME: phase4_search_python
+    ports: ["127.0.0.1::3008"]
+    volumes:
+      - ./.artifacts/phase7/legacy/search-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/search-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks: [do-cu-micro-net]
+  message-phase4-node:
+    profiles: [phase4-test]
+    image: kientrucpm-message-service
+    environment:
+      <<: *node
+      PORT: '3005'
+      DB_HOST: message-db
+      DB_NAME: phase4_message_node
+    volumes:
+      - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks: [do-cu-micro-net]
+  message-phase4-python:
+    profiles: [phase4-test]
+    image: kientrucpm-message-service
+    environment:
+      <<: *node
+      PORT: '3005'
+      DB_HOST: message-db
+      DB_NAME: phase4_message_python
+    volumes:
+      - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks: [do-cu-micro-net]
+  dependencies-node:
+    profiles: [phase4-test]
+    image: kientrucpm-post-node-reference
+    command: [node, /fixtures/phase4-dependencies.cjs]
+    ports: ["127.0.0.1::3010"]
+    environment:
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      SEARCH_SERVICE_URL: http://search-phase4-node:3008
+      MESSAGE_SERVICE_URL: http://message-phase4-node:3005
+    volumes:
+      - ./tools/runtime/phase4-dependencies.cjs:/fixtures/phase4-dependencies.cjs:ro
+    networks: [do-cu-micro-net]
+  dependencies-python:
+    profiles: [phase4-test]
+    image: kientrucpm-post-node-reference
+    command: [node, /fixtures/phase4-dependencies.cjs]
+    ports: ["127.0.0.1::3010"]
+    environment:
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      SEARCH_SERVICE_URL: http://search-phase4-python:3008
+      MESSAGE_SERVICE_URL: http://message-phase4-python:3005
+    volumes:
+      - ./tools/runtime/phase4-dependencies.cjs:/fixtures/phase4-dependencies.cjs:ro
+    networks: [do-cu-micro-net]
+  favorite-phase4:
+    profiles: [phase4-test]
+    image: kientrucpm-favorite-service
+    ports: ["127.0.0.1::3009"]
+    environment:
+      <<: *node
+      PORT: '3009'
+      DB_HOST: favorite-db
+      DB_NAME: phase4_favorite_test
+      POST_SERVICE_URL: http://post-candidate:3003
+    volumes:
+      - ./.artifacts/phase7/legacy/favorite-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/favorite-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks: [do-cu-micro-net]
+  gateway-phase4:
+    profiles: [phase4-test]
+    image: kientrucpm-api-gateway
+    ports: ["127.0.0.1::3000"]
+    environment:
+      SERVICE_NAME: api-gateway
+      PORT: '3000'
+      POST_SERVICE_URL: http://post-candidate:3003
+      FAVORITE_SERVICE_URL: http://favorite-phase4:3009
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+    networks: [do-cu-micro-net]
+volumes:
+  phase4_uploads_node:
+  phase4_uploads_python:

@@ -1,0 +1,37 @@
+# Apply LAST after the selected earlier phase's test overlay.
+# Candidate Message/Notification become Python; historical Node references stay Node.
+x-message: &message
+  image: kientrucpm-message-python-phase6
+  volumes: !reset []
+  environment: &message-env
+    NODE_OPTIONS: null
+    LEGACY_SCHEMA_SYNC: null
+    SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+    ALLOWED_HOSTS: '*'
+    SERVICE_NAME: message-service
+    USER_SERVICE_URL: http://user-service:3002
+    AUTH_SERVICE_URL: http://auth-service:3001
+    NOTIFICATION_SERVICE_URL: http://notification-service:3006
+services:
+  notification-test:
+    profiles: [phase2-test]
+    image: kientrucpm-notification-python-phase6
+    volumes: !reset []
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      SERVICE_NAME: notification-service
+      ALLOWED_HOSTS: '*'
+      NODE_ENV: development
+      MOCK_EMAIL: 'true'
+  message-cross:
+    profiles: [phase3-test]
+    <<: *message
+    environment:
+      <<: *message-env
+      USER_SERVICE_URL: http://user-candidate:3002
+  message-phase4-python:
+    profiles: [phase4-test]
+    <<: *message
+  message-phase5:
+    profiles: [phase5-test]
+    <<: *message

@@ -1,0 +1,125 @@
+# Explicit opt-in schema-only clones. No live business fixtures in parity services.
+x-node-environment: &node-environment
+  DB_USER: ${PYTHON_DB_USER:?Set DB user}
+  DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+  JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+  NODE_OPTIONS: --require /app/phase3-reference-preload.cjs
+  LEGACY_SCHEMA_SYNC: disabled
+  USER_SERVICE_URL: http://user-candidate:3002
+  CATEGORY_SERVICE_URL: http://category-candidate:3004
+  SEARCH_SERVICE_URL: http://phase3-search-fixture:3008
+x-python-environment: &python-environment
+  SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+  JWT_SECRET: ${JWT_SECRET:?Set shared JWT key}
+  DB_PORT: '3306'
+  DB_USER: ${PYTHON_DB_USER:?Set DB user}
+  DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+  ALLOWED_HOSTS: localhost,127.0.0.1,user-candidate,category-candidate
+services:
+  phase3-search-fixture:
+    profiles: [phase3-test]
+    image: kientrucpm-post-service
+    command: [node, /fixtures/phase3-search-fixture.cjs]
+    ports: ["127.0.0.1::3008"]
+    volumes:
+      - ./tools/runtime/phase3-search-fixture.cjs:/fixtures/phase3-search-fixture.cjs:ro
+    networks: [do-cu-micro-net]
+  user-reference:
+    profiles: [phase3-test]
+    image: kientrucpm-user-node-reference
+    build: {context: ./.artifacts/phase7/legacy/user-service, dockerfile: Dockerfile}
+    ports: ["127.0.0.1::3002"]
+    environment:
+      <<: *node-environment
+      PORT: '3002'
+      DB_HOST: user-db
+      DB_NAME: phase3_user_node
+    volumes:
+      - ./.artifacts/phase7/legacy/user-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/user-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./tools/runtime/phase3-reference-preload.cjs:/app/phase3-reference-preload.cjs:ro
+    networks: [do-cu-micro-net]
+  user-candidate:
+    profiles: [phase3-test]
+    image: kientrucpm-user-python-phase3
+    ports: ["127.0.0.1::3002"]
+    environment:
+      <<: *python-environment
+      PORT: '3002'
+      SERVICE_NAME: user-service
+      DB_HOST: user-db
+      DB_NAME: phase3_user_python
+    networks: [do-cu-micro-net]
+  category-reference:
+    profiles: [phase3-test]
+    image: kientrucpm-category-node-reference
+    build: {context: ./.artifacts/phase7/legacy/category-service, dockerfile: Dockerfile}
+    ports: ["127.0.0.1::3004"]
+    environment:
+      <<: *node-environment
+      PORT: '3004'
+      DB_HOST: category-db
+      DB_NAME: phase3_category_node
+      PHASE3_DISABLE_TEST_SEED: 'true'
+    volumes:
+      - ./.artifacts/phase7/legacy/category-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/category-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./tools/runtime/phase3-reference-preload.cjs:/app/phase3-reference-preload.cjs:ro
+    networks: [do-cu-micro-net]
+  category-candidate:
+    profiles: [phase3-test]
+    image: kientrucpm-category-python-phase3
+    ports: ["127.0.0.1::3004"]
+    environment:
+      <<: *python-environment
+      PORT: '3004'
+      SERVICE_NAME: category-service
+      DB_HOST: category-db
+      DB_NAME: phase3_category_python
+    networks: [do-cu-micro-net]
+  message-cross:
+    profiles: [phase3-test]
+    image: kientrucpm-message-service
+    ports: ["127.0.0.1::3005"]
+    environment:
+      <<: *node-environment
+      PORT: '3005'
+      DB_HOST: message-db
+      DB_NAME: phase3_message_test
+    volumes:
+      - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./tools/runtime/phase3-reference-preload.cjs:/app/phase3-reference-preload.cjs:ro
+    networks: [do-cu-micro-net]
+  post-cross:
+    profiles: [phase3-test]
+    image: kientrucpm-post-service
+    ports: ["127.0.0.1::3003"]
+    environment:
+      <<: *node-environment
+      PORT: '3003'
+      DB_HOST: post-db
+      DB_NAME: phase3_post_test
+    volumes:
+      - ./.artifacts/phase7/legacy/post-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/post-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./tools/runtime/phase3-reference-preload.cjs:/app/phase3-reference-preload.cjs:ro
+    networks: [do-cu-micro-net]
+  gateway-phase3-probe:
+    profiles: [phase3-test]
+    image: kientrucpm-api-gateway
+    ports: ["127.0.0.1::3000"]
+    environment:
+      SERVICE_NAME: api-gateway
+      PORT: '3000'
+      AUTH_SERVICE_URL: http://auth-candidate:3001
+      USER_SERVICE_URL: http://user-candidate:3002
+      CATEGORY_SERVICE_URL: http://category-candidate:3004
+      POST_SERVICE_URL: http://post-cross:3003
+      MESSAGE_SERVICE_URL: http://message-cross:3005
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+    networks: [do-cu-micro-net]

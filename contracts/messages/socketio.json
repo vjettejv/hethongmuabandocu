@@ -1,0 +1,29 @@
+{
+  "implemented": false,
+  "path": "/socket.io/",
+  "namespace": "default",
+  "room": "user_<userId>",
+  "events": [
+    {
+      "name": "join_user_room",
+      "direction": "client_to_server",
+      "payload": "userId scalar"
+    },
+    {
+      "name": "receive_message",
+      "direction": "server_to_client",
+      "payload": "Message"
+    },
+    {
+      "name": "receive_notification",
+      "direction": "server_to_client",
+      "payload": "Notification"
+    }
+  ],
+  "constraints": [
+    "Socket.IO client is not a plain WebSocket client.",
+    "No Conversation model in baseline.",
+    "No message read receipt endpoint.",
+    "Phase 6 chooses protocol adapter; Phase 1 has no Channels/Redis."
+  ]
+}

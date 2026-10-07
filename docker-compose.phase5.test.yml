@@ -1,0 +1,225 @@
+services:
+  favorite-phase5-node:
+    profiles:
+    - phase5-test
+    image: kientrucpm-favorite-service
+    ports:
+    - 127.0.0.1::3009
+    environment:
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+      PORT: '3009'
+      DB_HOST: favorite-db
+      DB_NAME: phase5_favorite_node
+      SERVICE_NAME: favorite-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,favorite-phase5-node
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./.artifacts/phase7/legacy/favorite-service/src:/app/src:ro
+    - ./.artifacts/phase7/legacy/favorite-service/server.js:/app/server.js:ro
+    - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+  favorite-phase5-python:
+    profiles:
+    - phase5-test
+    image: kientrucpm-favorite-python-phase5
+    ports:
+    - 127.0.0.1::3009
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      DEPENDENCY_TIMEOUT: '1'
+      PORT: '3009'
+      DB_HOST: favorite-db
+      DB_NAME: phase5_favorite_python
+      SERVICE_NAME: favorite-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,favorite-phase5-python
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+  review-phase5-node:
+    profiles:
+    - phase5-test
+    image: kientrucpm-review-service
+    ports:
+    - 127.0.0.1::3007
+    environment:
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+      PORT: '3007'
+      DB_HOST: review-db
+      DB_NAME: phase5_review_node
+      SERVICE_NAME: review-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,review-phase5-node
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./.artifacts/phase7/legacy/review-service/src:/app/src:ro
+    - ./.artifacts/phase7/legacy/review-service/server.js:/app/server.js:ro
+    - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    - phase5_uploads_node:/app/uploads
+    user: 0:0
+  review-phase5-python:
+    profiles:
+    - phase5-test
+    image: kientrucpm-review-python-phase5
+    ports:
+    - 127.0.0.1::3007
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      DEPENDENCY_TIMEOUT: '3'
+      PORT: '3007'
+      DB_HOST: review-db
+      DB_NAME: phase5_review_python
+      SERVICE_NAME: review-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,review-phase5-python
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+    user: 0:0
+    volumes:
+    - phase5_uploads_python:/app/uploads
+  search-phase5-node:
+    profiles:
+    - phase5-test
+    image: kientrucpm-search-service
+    ports:
+    - 127.0.0.1::3008
+    environment:
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+      PORT: '3008'
+      DB_HOST: search-db
+      DB_NAME: phase5_search_node
+      SERVICE_NAME: search-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,search-phase5-node
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+    volumes:
+    - ./.artifacts/phase7/legacy/search-service/src:/app/src:ro
+    - ./.artifacts/phase7/legacy/search-service/server.js:/app/server.js:ro
+    - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+  search-phase5-python:
+    profiles:
+    - phase5-test
+    image: kientrucpm-search-python-phase5
+    ports:
+    - 127.0.0.1::3008
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      DEPENDENCY_TIMEOUT: '1'
+      PORT: '3008'
+      DB_HOST: search-db
+      DB_NAME: phase5_search_python
+      SERVICE_NAME: search-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,search-phase5-python
+      POST_SERVICE_URL: http://post-phase5:3003
+      UPLOAD_ROOT: /app/uploads
+    networks:
+    - do-cu-micro-net
+  post-phase5:
+    profiles:
+    - phase5-test
+    image: kientrucpm-post-python-phase4
+    user: 0:0
+    ports:
+    - 127.0.0.1::3003
+    environment:
+      SECRET_KEY: ${PYTHON_SECRET_KEY:?Set Django key}
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      DEPENDENCY_TIMEOUT: '1'
+      PORT: '3003'
+      SERVICE_NAME: post-service
+      ALLOWED_HOSTS: localhost,127.0.0.1,post-phase5
+      DB_HOST: post-db
+      DB_NAME: phase5_post_test
+      UPLOAD_ROOT: /app/uploads
+      CATEGORY_SERVICE_URL: http://dependencies-phase5:3010/category
+      SEARCH_SERVICE_URL: http://dependencies-phase5:3010
+      MESSAGE_SERVICE_URL: http://dependencies-phase5:3010
+    volumes:
+    - phase5_uploads_python:/app/uploads
+    networks:
+    - do-cu-micro-net
+  message-phase5:
+    profiles:
+    - phase5-test
+    image: kientrucpm-message-service
+    environment:
+      DB_USER: ${PYTHON_DB_USER:?Set DB user}
+      DB_PASSWORD: ${PYTHON_DB_PASSWORD:?Set DB password}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT}
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+      PORT: '3005'
+      DB_HOST: message-db
+      DB_NAME: phase5_message_test
+    volumes:
+    - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+    - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+    - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+    networks:
+    - do-cu-micro-net
+  dependencies-phase5:
+    profiles:
+    - phase5-test
+    image: kientrucpm-post-node-reference
+    command:
+    - node
+    - /fixtures/dependencies.cjs
+    ports:
+    - 127.0.0.1::3010
+    environment:
+      CATEGORY_SERVICE_URL: http://category-service:3004
+      SEARCH_SERVICE_URL: http://search-phase5-python:3008
+      MESSAGE_SERVICE_URL: http://message-phase5:3005
+    volumes:
+    - ./tools/runtime/phase4-dependencies.cjs:/fixtures/dependencies.cjs:ro
+    networks:
+    - do-cu-micro-net
+  gateway-phase5:
+    profiles:
+    - phase5-test
+    image: kientrucpm-api-gateway
+    ports:
+    - 127.0.0.1::3000
+    environment:
+      SERVICE_NAME: api-gateway
+      PORT: '3000'
+      POST_SERVICE_URL: http://post-phase5:3003
+      FAVORITE_SERVICE_URL: http://favorite-phase5-python:3009
+      REVIEW_SERVICE_URL: http://review-phase5-python:3007
+      SEARCH_SERVICE_URL: http://search-phase5-python:3008
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+    networks:
+    - do-cu-micro-net
+volumes:
+  phase5_uploads_node: null
+  phase5_uploads_python: null

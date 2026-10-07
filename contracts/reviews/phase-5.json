@@ -1,0 +1,13 @@
+{
+  "endpoints": [
+    "GET /reviews/user/:userId",
+    "POST /reviews",
+    "PUT /reviews/:id",
+    "DELETE /reviews/:id"
+  ],
+  "public": true,
+  "imageField": "image",
+  "price": null,
+  "create": "raw Review; input numeric strings retained",
+  "update": "truthy rating/comment only"
+}

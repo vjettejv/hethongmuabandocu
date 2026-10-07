@@ -1,0 +1,1298 @@
+{
+  "format_version": 1,
+  "baseline_commit": "92777b8f70b6717e3ffd12657c725b2ea4e3d0ab",
+  "provenance": "Static source inspection, not captured live responses.",
+  "endpoints": [
+    {
+      "id": "auth-post-register",
+      "service": "auth-service",
+      "method": "POST",
+      "service_path": "/register",
+      "gateway_path": "/auth/register",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "username": "string",
+          "email": "string",
+          "password": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          201
+        ],
+        "shape": {
+          "message": "string",
+          "userId": "integer"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          400,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "auth-service/src/routes/index.js",
+      "error_overrides": {
+        "400": {
+          "message": "string"
+        }
+      }
+    },
+    {
+      "id": "auth-post-login",
+      "service": "auth-service",
+      "method": "POST",
+      "service_path": "/login",
+      "gateway_path": "/auth/login",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "username?": "string",
+          "email?": "string",
+          "password": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "token": "string",
+          "user": "AuthUser"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "auth-service/src/routes/index.js",
+      "notes": "username || email; login does not gate on isVerified"
+    },
+    {
+      "id": "auth-post-verify-otp",
+      "service": "auth-service",
+      "method": "POST",
+      "service_path": "/verify-otp",
+      "gateway_path": "/auth/verify-otp",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "email": "string",
+          "otp": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "message": "string"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "auth-service/src/routes/index.js",
+      "notes": "Wrong OTP handler text differs from controller 400 comparison; observed controller status is 500."
+    },
+    {
+      "id": "auth-get-id",
+      "service": "auth-service",
+      "method": "GET",
+      "service_path": "/:id",
+      "gateway_path": "/auth/:id",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "AuthUser",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "auth-service/src/routes/index.js"
+    },
+    {
+      "id": "auth-post-verify",
+      "service": "auth-service",
+      "method": "POST",
+      "service_path": "/verify",
+      "gateway_path": "/auth/verify",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "valid": "boolean",
+          "user": "JwtClaims"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "auth-service/src/routes/index.js"
+    },
+    {
+      "id": "user-get-me",
+      "service": "user-service",
+      "method": "GET",
+      "service_path": "/me",
+      "gateway_path": "/users/me",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Profile | {}",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "user-service/src/routes/index.js",
+      "notes": "Handler errors return 200 {}."
+    },
+    {
+      "id": "user-get-authId",
+      "service": "user-service",
+      "method": "GET",
+      "service_path": "/:authId",
+      "gateway_path": "/users/:authId",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Profile",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "user-service/src/routes/index.js"
+    },
+    {
+      "id": "user-put-me",
+      "service": "user-service",
+      "method": "PUT",
+      "service_path": "/me",
+      "gateway_path": "/users/me",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {
+          "fullName?": "string",
+          "phone?": "string",
+          "address?": "string",
+          "avatar?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Profile",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "user-service/src/routes/index.js"
+    },
+    {
+      "id": "user-put-authId",
+      "service": "user-service",
+      "method": "PUT",
+      "service_path": "/:authId",
+      "gateway_path": "/users/:authId",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "fullName?": "string",
+          "phone?": "string",
+          "address?": "string",
+          "avatar?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Profile",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "user-service/src/routes/index.js"
+    },
+    {
+      "id": "post-get-root",
+      "service": "post-service",
+      "method": "GET",
+      "service_path": "/",
+      "gateway_path": "/posts",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {
+          "categoryId?": "query string",
+          "keyword?": "string",
+          "status?": "string"
+        },
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "PostQuery[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js",
+      "notes": "No implicit approved filter; createdAt DESC."
+    },
+    {
+      "id": "post-get-my-posts",
+      "service": "post-service",
+      "method": "GET",
+      "service_path": "/my-posts",
+      "gateway_path": "/posts/my-posts",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "PostQuery[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-get-admin-posts",
+      "service": "post-service",
+      "method": "GET",
+      "service_path": "/admin/posts",
+      "gateway_path": "/admin/posts",
+      "aliases": [
+        "/posts/admin/posts"
+      ],
+      "auth": "bearer JWT; no role enforcement",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "PostQuery[]"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-get-id",
+      "service": "post-service",
+      "method": "GET",
+      "service_path": "/:id",
+      "gateway_path": "/posts/:id",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "PostQuery",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-post-root",
+      "service": "post-service",
+      "method": "POST",
+      "service_path": "/",
+      "gateway_path": "/posts",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {
+          "categoryId": "integer-like multipart string",
+          "title": "string",
+          "description?": "string",
+          "price": "decimal-like multipart string",
+          "condition?": "string",
+          "images?": "files(max 5)"
+        },
+        "query": {},
+        "content_type": "multipart/form-data"
+      },
+      "success": {
+        "statuses": [
+          201
+        ],
+        "shape": {
+          "message": "string",
+          "post": "PostRaw"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-delete-id",
+      "service": "post-service",
+      "method": "DELETE",
+      "service_path": "/:id",
+      "gateway_path": "/posts/:id",
+      "aliases": [],
+      "auth": "bearer JWT + owner",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "message": "string"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-put-admin-posts-id",
+      "service": "post-service",
+      "method": "PUT",
+      "service_path": "/admin/posts/:id",
+      "gateway_path": "/admin/posts/:id",
+      "aliases": [
+        "/posts/admin/posts/:id"
+      ],
+      "auth": "bearer JWT; no role enforcement",
+      "request": {
+        "body": {
+          "status": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "PostRaw"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js"
+    },
+    {
+      "id": "post-delete-admin-posts-id",
+      "service": "post-service",
+      "method": "DELETE",
+      "service_path": "/admin/posts/:id",
+      "gateway_path": "/admin/posts/:id",
+      "aliases": [
+        "/posts/admin/posts/:id"
+      ],
+      "auth": "bearer JWT; no role enforcement",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "message": "string"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "post-service/src/routes/index.js",
+      "notes": "200 also when ID does not exist; no search sync."
+    },
+    {
+      "id": "category-get-root",
+      "service": "category-service",
+      "method": "GET",
+      "service_path": "/",
+      "gateway_path": "/categories",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Category[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "category-service/src/routes/index.js"
+    },
+    {
+      "id": "category-post-root",
+      "service": "category-service",
+      "method": "POST",
+      "service_path": "/",
+      "gateway_path": "/categories",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "name": "string",
+          "description?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          201
+        ],
+        "shape": "Category",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "category-service/src/routes/index.js"
+    },
+    {
+      "id": "category-post-admin-categories",
+      "service": "category-service",
+      "method": "POST",
+      "service_path": "/admin/categories",
+      "gateway_path": "/admin/categories",
+      "aliases": [
+        "/categories/admin/categories"
+      ],
+      "auth": "public",
+      "request": {
+        "body": {
+          "name": "string",
+          "description?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          201
+        ],
+        "shape": {
+          "data": "Category"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "category-service/src/routes/index.js"
+    },
+    {
+      "id": "favorite-post-toggle",
+      "service": "favorite-service",
+      "method": "POST",
+      "service_path": "/toggle",
+      "gateway_path": "/favorites/toggle",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {
+          "postId": "integer"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200,
+          201
+        ],
+        "shape": {
+          "message": "string",
+          "isFavorited": "boolean"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "favorite-service/src/routes/index.js",
+      "notes": "201 when added; 200 when removed."
+    },
+    {
+      "id": "favorite-get-check-postId",
+      "service": "favorite-service",
+      "method": "GET",
+      "service_path": "/check/:postId",
+      "gateway_path": "/favorites/check/:postId",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "isFavorited": "boolean"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "favorite-service/src/routes/index.js"
+    },
+    {
+      "id": "favorite-get-my-favorites",
+      "service": "favorite-service",
+      "method": "GET",
+      "service_path": "/my-favorites",
+      "gateway_path": "/favorites/my-favorites",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "PostQuery[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "favorite-service/src/routes/index.js",
+      "notes": "Hydrated Post records, not Favorite rows; failed fetches omitted."
+    },
+    {
+      "id": "review-get-user-userId",
+      "service": "review-service",
+      "method": "GET",
+      "service_path": "/user/:userId",
+      "gateway_path": "/reviews/user/:userId",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {
+          "rating?": "query string",
+          "hasImage?": "true|false"
+        },
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Review[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "review-service/src/routes/index.js",
+      "notes": "createdAt DESC; no pagination."
+    },
+    {
+      "id": "review-post-root",
+      "service": "review-service",
+      "method": "POST",
+      "service_path": "/",
+      "gateway_path": "/reviews",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "reviewerId": "integer-like multipart string",
+          "revieweeId": "integer-like multipart string",
+          "postId?": "integer-like multipart string",
+          "rating": "1..5",
+          "comment?": "string",
+          "image?": "file"
+        },
+        "query": {},
+        "content_type": "multipart/form-data"
+      },
+      "success": {
+        "statuses": [
+          201
+        ],
+        "shape": "Review",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "review-service/src/routes/index.js"
+    },
+    {
+      "id": "review-put-id",
+      "service": "review-service",
+      "method": "PUT",
+      "service_path": "/:id",
+      "gateway_path": "/reviews/:id",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "rating?": "1..5",
+          "comment?": "string",
+          "image?": "file"
+        },
+        "query": {},
+        "content_type": "multipart/form-data"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "Review",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "review-service/src/routes/index.js"
+    },
+    {
+      "id": "review-delete-id",
+      "service": "review-service",
+      "method": "DELETE",
+      "service_path": "/:id",
+      "gateway_path": "/reviews/:id",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "message": "string"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          404,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "review-service/src/routes/index.js"
+    },
+    {
+      "id": "search-get-root",
+      "service": "search-service",
+      "method": "GET",
+      "service_path": "/",
+      "gateway_path": "/search",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {
+          "query?": "string",
+          "categoryId?": "query string",
+          "minPrice?": "query string",
+          "maxPrice?": "query string"
+        },
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "SearchIndex[]",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "search-service/src/routes/index.js",
+      "notes": "LIKE title/description, approved only, createdAt DESC, id=postId, no pagination."
+    },
+    {
+      "id": "search-post-sync",
+      "service": "search-service",
+      "method": "POST",
+      "service_path": "/sync",
+      "gateway_path": "/search/sync",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "postId": "integer",
+          "title": "string",
+          "description?": "string",
+          "price?": "number|string",
+          "categoryId?": "integer",
+          "imageUrl?": "string|null",
+          "categoryName?": "string",
+          "status?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "message": "string"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "search-service/src/routes/index.js"
+    },
+    {
+      "id": "message-get-health",
+      "service": "message-service",
+      "method": "GET",
+      "service_path": "/health",
+      "gateway_path": "/messages/health",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": null
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "text: Message Service OK",
+        "content_type": "text/html"
+      },
+      "errors": {
+        "statuses": [],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js"
+    },
+    {
+      "id": "message-get-contacts",
+      "service": "message-service",
+      "method": "GET",
+      "service_path": "/contacts",
+      "gateway_path": "/messages/contacts",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "Contact[]"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js"
+    },
+    {
+      "id": "message-get-contactId",
+      "service": "message-service",
+      "method": "GET",
+      "service_path": "/:contactId",
+      "gateway_path": "/messages/:contactId",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "Message[]"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js",
+      "notes": "Two-user history createdAt ASC; route order matters."
+    },
+    {
+      "id": "message-post-root",
+      "service": "message-service",
+      "method": "POST",
+      "service_path": "/",
+      "gateway_path": "/messages",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {
+          "receiverId": "integer",
+          "content": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "Message"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js"
+    },
+    {
+      "id": "message-post-notifications",
+      "service": "message-service",
+      "method": "POST",
+      "service_path": "/notifications",
+      "gateway_path": "/messages/notifications",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "receiverId": "integer",
+          "title": "string",
+          "message": "string",
+          "link?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "success": "boolean",
+          "data": "Notification"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js"
+    },
+    {
+      "id": "message-get-notifications",
+      "service": "message-service",
+      "method": "GET",
+      "service_path": "/notifications",
+      "gateway_path": "/messages/notifications",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "data": "Message[]"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js",
+      "declared_response": {
+        "data": "Notification[]"
+      },
+      "observed_dispatch": "getHistory(contactId=\"notifications\")",
+      "notes": "Shadowed by GET /:contactId; no claim of valid notification list behavior."
+    },
+    {
+      "id": "message-put-notifications-read-all",
+      "service": "message-service",
+      "method": "PUT",
+      "service_path": "/notifications/read-all",
+      "gateway_path": "/messages/notifications/read-all",
+      "aliases": [],
+      "auth": "bearer JWT",
+      "request": {
+        "body": {},
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": {
+          "success": "boolean"
+        },
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          401,
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "message-service/src/routes/index.js"
+    },
+    {
+      "id": "notification-post-email",
+      "service": "notification-service",
+      "method": "POST",
+      "service_path": "/email",
+      "gateway_path": "/notifications/email",
+      "aliases": [],
+      "auth": "public",
+      "request": {
+        "body": {
+          "to": "string",
+          "subject": "string",
+          "text?": "string",
+          "html?": "string"
+        },
+        "query": {},
+        "content_type": "application/json"
+      },
+      "success": {
+        "statuses": [
+          200
+        ],
+        "shape": "EmailResult",
+        "content_type": "application/json"
+      },
+      "errors": {
+        "statuses": [
+          500
+        ],
+        "shape": {
+          "error": "string"
+        }
+      },
+      "evidence": "notification-service/src/routes/index.js",
+      "notes": "Mock unless NODE_ENV=production, MOCK_EMAIL!=true and SMTP_USER configured; not a queue."
+    }
+  ]
+}

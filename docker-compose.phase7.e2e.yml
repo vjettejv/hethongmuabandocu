@@ -1,0 +1,5 @@
+# Only the Search schema changes during guarded canonical E2E; restore in finally.
+services:
+  search-service:
+    environment:
+      DB_NAME: phase7_search_e2e

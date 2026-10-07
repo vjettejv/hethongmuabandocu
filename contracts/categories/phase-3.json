@@ -1,0 +1,26 @@
+{
+  "phase": 3,
+  "implemented": true,
+  "service": "category-service",
+  "database": "category_db",
+  "table": "categories",
+  "externalFields": ["id", "name", "description", "createdAt", "updatedAt"],
+  "endpoints": {
+    "GET /categories": {"status": 200, "response": "raw Category[]", "ordering": "no added ordering", "pagination": false},
+    "POST /categories": {"status": 201, "response": "raw Category"},
+    "POST /admin/categories": {"status": 201, "response": "{data: Category}"},
+    "POST /categories/admin/categories": {"aliasOf": "POST /admin/categories"}
+  },
+  "validation": {
+    "missingOrNullName": {"status": 500, "body": {"error": "notNull Violation: Category.name cannot be null"}},
+    "duplicateName": {"status": 500, "body": {"error": "Validation error"}},
+    "omittedDescription": "stored null; omitted from immediate create response; included as null after list lookup",
+    "emptyDescription": "preserved"
+  },
+  "timestamps": "UTC ISO 8601 milliseconds with Z; legacy DATETIME reloads at second precision",
+  "intentionalDivergences": [
+    "No startup seeding or schema sync; empty DB remains empty",
+    "Unexpected DB errors are sanitized; malformed field types return controlled errors"
+  ],
+  "deferredSecurityDebt": ["public category create", "public admin category create"]
+}

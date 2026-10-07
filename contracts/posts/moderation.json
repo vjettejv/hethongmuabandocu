@@ -1,0 +1,18 @@
+{
+  "supersedes": "Legacy status behavior documented in phase-4.json and compatibility.json",
+  "defaultStatus": "pending",
+  "postStatuses": ["pending", "approved", "rejected"],
+  "moderation": {
+    "method": "PUT",
+    "path": "/admin/posts/:id",
+    "acceptedDecisions": ["approved", "rejected"],
+    "invalidDecisionStatus": 400,
+    "invalidDecisionBody": {"error": "Status must be approved or rejected"},
+    "repeatDecision": "Idempotent, no duplicate moderation notification",
+    "changeDecision": "Admin may correct an existing approval/rejection"
+  },
+  "searchVisibleStatus": "approved",
+  "searchDeletionMarker": "deleted",
+  "legacyDataNormalization": "available -> pending, preserving all other columns and timestamps",
+  "migration": "tools/normalize_post_statuses.py --apply"
+}

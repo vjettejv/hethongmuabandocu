@@ -1,0 +1,26 @@
+{
+  "implemented": false,
+  "default_status": "available",
+  "search_visible_status": "approved",
+  "query_price_type": "number",
+  "raw_orm_price": "endpoint-dependent number/string; verify against controlled Node fixtures",
+  "ids": "numeric INT; do not introduce UUID",
+  "timestamps": [
+    "createdAt",
+    "updatedAt"
+  ],
+  "sort": "createdAt DESC",
+  "pagination": false,
+  "upload": {
+    "post_field": "images",
+    "max_post_files": 5,
+    "review_field": "image",
+    "url": "/uploads/<filename>",
+    "volume": "shared_uploads"
+  },
+  "known_debt": [
+    "sync-all.js model default is pending",
+    "admin deletion does not sync search",
+    "post file deletion does not unlink physical images"
+  ]
+}

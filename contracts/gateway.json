@@ -1,0 +1,28 @@
+{
+  "implemented_in_python": false,
+  "prefixes": [
+    "/auth",
+    "/users",
+    "/posts",
+    "/categories",
+    "/messages",
+    "/notifications",
+    "/reviews",
+    "/search",
+    "/favorites"
+  ],
+  "special_routes": [
+    "/admin/posts",
+    "/admin/categories",
+    "/uploads",
+    "/socket.io/"
+  ],
+  "legacy_health": {
+    "method": "GET",
+    "path": "/health",
+    "status": 200,
+    "content_type": "text/html",
+    "body": "Gateway OK"
+  },
+  "proxy_risk": "http-proxy-middleware v3 is declared but event hooks use old option names."
+}

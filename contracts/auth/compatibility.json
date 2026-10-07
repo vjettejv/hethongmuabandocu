@@ -1,0 +1,28 @@
+{
+  "implemented": false,
+  "jwt": {
+    "algorithm": "HS256 (jsonwebtoken signing default)",
+    "claims": [
+      "id",
+      "roleId",
+      "iat",
+      "exp"
+    ],
+    "ttl_seconds": 86400,
+    "transport": "Authorization: Bearer <token>",
+    "refresh": false
+  },
+  "password": {
+    "formats": [
+      "$2a$10$",
+      "$2b$10$"
+    ],
+    "cost": 10,
+    "real_hashes_copied": false,
+    "phase2_tests": [
+      "Generate Node bcrypt fixture from synthetic password; Python verifies.",
+      "Generate Python bcrypt fixture from synthetic password; Node verifies.",
+      "Reject wrong password without modifying baseline users."
+    ]
+  }
+}

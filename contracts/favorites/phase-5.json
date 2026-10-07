@@ -1,0 +1,11 @@
+{
+  "endpoints": [
+    "POST /favorites/toggle",
+    "GET /favorites/check/:postId",
+    "GET /favorites/my-favorites"
+  ],
+  "jwt": "HS256 claims.id",
+  "toggleAddStatus": 201,
+  "toggleRemoveStatus": 200,
+  "hydration": "raw Post[], filtered failures"
+}

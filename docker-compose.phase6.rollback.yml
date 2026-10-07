@@ -1,0 +1,24 @@
+# Historical recovery asset; immutable Git export required.
+# Do not apply to canonical data; see docs/migration/phase-7-rollback.md.
+# Apply LAST; preserve the Phase 2-5 Python services. No live rollback required.
+services:
+  message-service:
+    image: kientrucpm-message-service
+    build: {context: ./.artifacts/phase7/legacy/message-service, dockerfile: Dockerfile}
+    command: [node, server.js]
+    healthcheck: !reset null
+    environment:
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+    volumes: !override
+      - ./.artifacts/phase7/legacy/message-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/message-service/server.js:/app/server.js:ro
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+  notification-service:
+    image: kientrucpm-notification-service
+    build: {context: ./.artifacts/phase7/legacy/notification-service, dockerfile: Dockerfile}
+    command: [node, server.js]
+    healthcheck: !reset null
+    volumes: !override
+      - ./.artifacts/phase7/legacy/notification-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/notification-service/server.js:/app/server.js:ro

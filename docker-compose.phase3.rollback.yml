@@ -1,0 +1,26 @@
+# Historical recovery asset; immutable Git export required.
+# Do not apply to canonical data; see docs/migration/phase-7-rollback.md.
+# Optional LAST overlay: restore only Node User/Category; keep Phase 2 Gateway/Auth.
+services:
+  user-service:
+    image: kientrucpm-user-node-reference
+    build: {context: ./.artifacts/phase7/legacy/user-service, dockerfile: Dockerfile}
+    environment:
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+    volumes:
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./.artifacts/phase7/legacy/user-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/user-service/server.js:/app/server.js:ro
+    healthcheck: {disable: true}
+  category-service:
+    image: kientrucpm-category-node-reference
+    build: {context: ./.artifacts/phase7/legacy/category-service, dockerfile: Dockerfile}
+    environment:
+      NODE_OPTIONS: --require /app/legacy-schema-guard.cjs
+      LEGACY_SCHEMA_SYNC: disabled
+    volumes:
+      - ./tools/runtime/legacy-schema-guard.cjs:/app/legacy-schema-guard.cjs:ro
+      - ./.artifacts/phase7/legacy/category-service/src:/app/src:ro
+      - ./.artifacts/phase7/legacy/category-service/server.js:/app/server.js:ro
+    healthcheck: {disable: true}

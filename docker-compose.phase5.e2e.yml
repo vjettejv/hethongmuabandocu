@@ -1,0 +1,8 @@
+# Apply LAST only during guarded canonical E2E; restore normal stack afterwards.
+services:
+  search-service:
+    environment:
+      DB_NAME: phase5_search_e2e
+  post-service:
+    environment:
+      MESSAGE_SERVICE_URL: http://dependencies-phase5:3010
